@@ -314,6 +314,10 @@ export default function Abacus(parentDivId, type) {
     abacusCtrl.activated(nodeId);
   };
 
+  this.reset = function () {
+    abacusCtrl.init();
+  };
+
   function mouseOverElement(pos) {
     let selectedElement = -1;
     for (const n in uiElements) {

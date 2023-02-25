@@ -1,30 +1,30 @@
-import React, { useReducer, useState, useEffect, useRef } from 'react';
+import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
-import EasySpeech from 'easy-speech';
-import useEventListener from './useEventListener';
-import Abacus from './Abacus.js';
-import { sendMessageToHost } from './utils';
+import EasySpeech from "easy-speech";
+import useEventListener from "./useEventListener";
+import Abacus from "./Abacus.js";
+import { sendMessageToHost } from "./utils";
 
 const App: React.FC = () => {
-  const abacus = useRef<any>(new Abacus('myAbacus', 0));
+  const abacus = useRef<any>(new Abacus("myAbacus", 0));
   const result = useRef<number>(-1);
   const value = useRef<number>(0);
-  const lang = useRef<string>('bg-BG'); //'en-US');
+  const lang = useRef<string>("bg-BG"); //'en-US');
   const speed = useRef<number>(500); // ms between words //'en-US');
   const voice = useRef<SpeechSynthesisVoice | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>();
   const [run, setRun] = useState<boolean>(false);
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   // @ts-ignore
-  const isDarkMode = window.theme && window.theme === 'dark';
+  const isDarkMode = window.theme && window.theme === "dark";
   // @ts-ignore
   const readOnly = () => !window.editMode;
   // @ts-ignore
-  const getContent = () => window.mdContent || '12 +22 +32 −42 +62';
+  const getContent = () => window.mdContent || "12 +22 +32 -42 +62";
 
   function parse(str: string) {
     let res = 0;
-    const texts = getContent().replaceAll('−', '-').split(' ');
+    const texts = getContent().split(" ");
     for (let i = 0; i < texts.length; i++) {
       res += parseInt(texts[i], 10);
     }
@@ -59,7 +59,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (run) {
-      read(getContent()).then(() => console.log('read'));
+      read(getContent()).then(() => console.log("read"));
     }
   }, [run]);
 
@@ -68,14 +68,16 @@ const App: React.FC = () => {
   };
 
   async function read(txt: string) {
-    const texts = txt.split(' ');
+    const texts = txt.split(" ");
     for (let i = 0; i < texts.length; i++) {
       await sleep(speed.current);
-      await speak(texts[i]);
+      const txt = texts[i].replaceAll("-","−");
+      await speak(txt);
 
-      value.current += parseInt(texts[i].replaceAll('−', '-'), 10);
+      value.current += parseInt(texts[i], 10);
       forceUpdate();
       // set abacus
+      abacus.current.reset();
       const activatedArray = decimalToNodeIndex(value.current);
       activatedArray.forEach((activated) =>
         abacus.current.setPosition(activated)
@@ -87,36 +89,45 @@ const App: React.FC = () => {
     }
   }
 
-  /*function decimalToNodeIndex(decimalInteger: number) {
+  function decimalToNodeIndex(decimalInteger: number, numNodesPerColumn = 5) {
     const numColumns = 8;
-    const numNodesPerColumn = 5;
     const maxDecimalValue = Math.pow(10, numColumns) - 1;
     // Handle out-of-range input values
     if (decimalInteger < 0 || decimalInteger > maxDecimalValue) {
-      throw new Error('Input value out of range');
+      throw new Error("Input value out of range");
     }
 
     // Convert the decimal integer to an array of digits
-    const digits = decimalInteger.toString().split('').map(Number);
+    const digits = decimalInteger.toString().split("").map(Number).reverse();
 
     // Pad the digits array with leading zeros if necessary
-    while (digits.length < numColumns) {
+    /*while (digits.length < numColumns) {
       digits.unshift(0);
-    }
+    }*/
 
     // Initialize an array to store the activated node indices
     const activatedNodes = [];
 
     // Loop through each column and set the corresponding node as activated
-    for (let column = 0; column < numColumns; column++) {
-      const digit = digits[column];
-      const nodeIndex = column * numNodesPerColumn + digit;
-      activatedNodes.push(nodeIndex);
+    for (let column = 0; column <= numColumns; column++) {
+      let digit = digits[column];
+      if (digit && digit > 0) {
+        if (digit >= 5) {
+          activatedNodes.push(
+            column * numNodesPerColumn + numNodesPerColumn - 1
+          );
+          digit = digit - 5;
+        }
+        if (digit > 0) {
+          digit = 4 - digit;
+          activatedNodes.push(column * numNodesPerColumn + digit);
+        }
+      }
     }
 
     // Return the array of activated node indices
     return activatedNodes;
-  }*/
+  }
 
   /*function decimalToNodeIndex(decimalInteger: number) {
     const numNodesPerColumn = 5;
@@ -143,7 +154,7 @@ const App: React.FC = () => {
     return activatedNodes;
   }*/
 
-  function decimalToNodeIndex(decimalInteger: number, numNodesPerColumn = 5) {
+  /*function decimalToNodeIndex(decimalInteger: number, numNodesPerColumn = 5) {
     let quotient = decimalInteger;
     const nodeIndex = [];
     let currentNodeIndex = 0;
@@ -154,7 +165,7 @@ const App: React.FC = () => {
       currentNodeIndex += numNodesPerColumn;
     }
     return nodeIndex.reverse();
-  }
+  }*/
 
   async function speak(text: string) {
     return new Promise((resolve) => {
@@ -174,28 +185,28 @@ const App: React.FC = () => {
   }
 
   // @ts-ignore
-  useEventListener('keydown', (event) => {
+  useEventListener("keydown", (event) => {
     if (event.ctrlKey || event.metaKey) {
-      if (event.key.toLowerCase() === 's') {
+      if (event.key.toLowerCase() === "s") {
         if (!readOnly()) {
-          sendMessageToHost({ command: 'saveDocument' });
+          sendMessageToHost({ command: "saveDocument" });
         }
       }
     }
   });
 
   // @ts-ignore
-  useEventListener('dblclick', (event) => {
+  useEventListener("dblclick", (event) => {
     if (readOnly()) {
-      sendMessageToHost({ command: 'editDocument' });
+      sendMessageToHost({ command: "editDocument" });
     }
   });
 
-  useEventListener('themeChanged', () => {
+  useEventListener("themeChanged", () => {
     forceUpdate();
   });
 
-  useEventListener('contentLoaded', () => {
+  useEventListener("contentLoaded", () => {
     forceUpdate();
   });
 
@@ -206,6 +217,7 @@ const App: React.FC = () => {
       );
       if (v) {
         voice.current = v;
+        abacus.current.reset();
         setRun(false);
       }
     }
@@ -226,8 +238,15 @@ const App: React.FC = () => {
   return (
     <div>
       <p>Current value: {value.current}</p>
-      {getContent() + '=' + result.current}
-      <button onClick={() => setRun(!run)}>Run</button>
+      {getContent() + "=" + result.current}
+      <button
+        onClick={() => {
+          setRun(!run);
+          value.current = 0;
+        }}
+      >
+        Run
+      </button>
       <input
         defaultValue={speed.current}
         onChange={(e) => handleSpeedChange(e.target.value)}
