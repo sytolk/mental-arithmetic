@@ -1,0 +1,59 @@
+{
+  "name": "@tagspaces/arithmetic-player",
+  "version": "1.0.0",
+  "description": "TagSpaces extension for mental arithmetic",
+  "homepage": "./",
+  "main": "build/index.js",
+  "files": [
+    "build/"
+  ],
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:dev": "react-app-rewired build",
+    "build:env": "npx env-cmd -f .env.development react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "code-format": "npx prettier --write .",
+    "npmpack": "npx shx cp -rL build/** ../../app/node_modules/@tagspaces/extensions/arithmetic-player/build",
+    "build:pack": "npm run build && npm run npmpack",
+    "pkg-publish": "npm publish --access public"
+  },
+  "keywords": [
+    "mental",
+    "arithmetic"
+  ],
+  "author": "TagSpaces UG <info@tagspaces.org> (https://www.tagspaces.org)",
+  "license": "MIT",
+  "dependencies": {
+    "easy-speech": "^1.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "prettier": "^2.7.1",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.7.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tagspaces/tagspaces-extensions.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tagspaces/tagspaces-extensions/issues"
+  }
+}
