@@ -55,5 +55,16 @@
   },
   "bugs": {
     "url": "https://github.com/tagspaces/tagspaces-extensions/issues"
+  },
+  "tsextension": {
+    "name": "Mental Arithmetic",
+    "types": [
+      "viewer",
+      "editor"
+    ],
+    "fileTypes": [
+      "arithmetic"
+    ],
+    "buildFolder": "build"
   }
 }
