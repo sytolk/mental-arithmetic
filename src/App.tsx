@@ -1,19 +1,34 @@
 import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
+import IconButton from "@mui/material/IconButton";
+import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
+// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SettingsIcon from "@mui/icons-material/Settings";
+import i18n from "./i18n";
 import useEventListener from "./useEventListener";
 import Abacus from "./Abacus.js";
 import { sendMessageToHost } from "./utils";
+import SettingsDialog from "./SettingsDialog";
+import { getSettings, saveSettings } from "./settings";
 
 const App: React.FC = () => {
   const abacus = useRef<any>(new Abacus("myAbacus", 0));
   const result = useRef<number>(-1);
   const value = useRef<number>(0);
-  const lang = useRef<string>("bg-BG"); //'en-US');
-  const speed = useRef<number>(500); // ms between words //'en-US');
-  const voice = useRef<SpeechSynthesisVoice | null>(null);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>();
-  const [run, setRun] = useState<boolean>(false);
+
+  const [isSettingsDialogOpened, setSettingsDialogOpened] =
+    useState<boolean>(false);
+  const languages = React.useRef<string[] | null>(null);
+  const language = React.useRef<string>(
+    getSettings("speechLanguage") || i18n.language
+  );
+  const allVoices = React.useRef<SpeechSynthesisVoice[] | null>(null);
+  const voices = React.useRef<SpeechSynthesisVoice[] | null>(null);
+  const voice = React.useRef<string>(getSettings("speechVoice"));
+  const rate = React.useRef<number>(getDefaultRate());
+  const speed = React.useRef<number>(1000);
+
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   // @ts-ignore
   const isDarkMode = window.theme && window.theme === "dark";
@@ -21,6 +36,62 @@ const App: React.FC = () => {
   const readOnly = () => !window.editMode;
   // @ts-ignore
   const getContent = () => window.mdContent || "12 +22 +32 -42 +62";
+
+  const speechSettings = {
+    speechSpeed: speed.current,
+    speechRate: rate.current,
+    speechLanguage: language.current,
+    speechVoice: voice.current,
+  };
+  useEffect(() => {
+    abacus.current.init();
+    //drawAbacus();
+    result.current = parse(getContent());
+
+    EasySpeech.init()
+      .then((success: boolean) => {
+        if (success) {
+          allVoices.current = EasySpeech.voices();
+          setVoices();
+        }
+      })
+      .catch((e: Error) => console.error(e));
+  }, []);
+
+  function setVoices(chooseFirst = false) {
+    if (allVoices.current && allVoices.current.length > 0) {
+      languages.current = [
+        ...new Set(allVoices.current.map((v) => v.lang)),
+      ].sort();
+      const langVoices = allVoices.current.filter(
+        (v) => v.lang === language.current
+      );
+
+      if (langVoices.length > 0) {
+        voices.current = langVoices;
+      } else {
+        const lVoices: SpeechSynthesisVoice[] = allVoices.current.filter((v) =>
+          v.lang.startsWith(language.current)
+        );
+        if (lVoices.length > 0) {
+          voices.current = lVoices;
+        } else {
+          voices.current = allVoices.current;
+        }
+      }
+      if (!voice.current || chooseFirst) {
+        voice.current = voices.current[0].name;
+      }
+    }
+  }
+
+  function getDefaultRate(): number {
+    const settingsRate = getSettings("speechRate");
+    if (settingsRate) {
+      return parseFloat(settingsRate);
+    }
+    return 0.9;
+  }
 
   function parse(str: string) {
     let res = 0;
@@ -32,37 +103,6 @@ const App: React.FC = () => {
     // return Function(`'use strict'; return (${str})`)();
   }
 
-  useEffect(() => {
-    abacus.current.init();
-    //drawAbacus();
-    result.current = parse(getContent());
-    EasySpeech.init()
-      .then((success: boolean) => {
-        if (success) {
-          const allVoices: SpeechSynthesisVoice[] = EasySpeech.voices();
-          if (allVoices) {
-            const langVoices: SpeechSynthesisVoice[] = allVoices.filter(
-              (v) => v.lang === lang.current
-            );
-
-            if (langVoices) {
-              voice.current = langVoices[0];
-              setVoices(langVoices);
-            } else {
-              setVoices(allVoices);
-            }
-          }
-        }
-      })
-      .catch((e: Error) => console.error(e));
-  }, []);
-
-  useEffect(() => {
-    if (run) {
-      read(getContent()).then(() => console.log("read"));
-    }
-  }, [run]);
-
   const sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
@@ -70,8 +110,8 @@ const App: React.FC = () => {
   async function read(txt: string) {
     const texts = txt.split(" ");
     for (let i = 0; i < texts.length; i++) {
-      await sleep(speed.current);
-      const txt = texts[i].replaceAll("-","−");
+      await sleep(speed.current); //1000 / rate.current);
+      const txt = texts[i].replaceAll("-", "−");
       await speak(txt);
 
       value.current += parseInt(texts[i], 10);
@@ -100,11 +140,6 @@ const App: React.FC = () => {
     // Convert the decimal integer to an array of digits
     const digits = decimalInteger.toString().split("").map(Number).reverse();
 
-    // Pad the digits array with leading zeros if necessary
-    /*while (digits.length < numColumns) {
-      digits.unshift(0);
-    }*/
-
     // Initialize an array to store the activated node indices
     const activatedNodes = [];
 
@@ -129,59 +164,47 @@ const App: React.FC = () => {
     return activatedNodes;
   }
 
-  /*function decimalToNodeIndex(decimalInteger: number) {
-    const numNodesPerColumn = 5;
-    const numColumns = 8;
-
-    if (decimalInteger < 0 || decimalInteger >= Math.pow(10, numColumns)) {
-      throw new Error("Input value out of range");
-    }
-
-    const digits = decimalInteger.toString().split("").map(Number);
-
-    while (digits.length < numColumns) {
-      digits.unshift(0);
-    }
-
-    const activatedNodes = [];
-
-    for (let column = numColumns - 1; column >= 0; column--) {
-      const digit = digits[column];
-      const nodeIndex = column * numNodesPerColumn + (numNodesPerColumn - digit);
-      activatedNodes.push(nodeIndex);
-    }
-
-    return activatedNodes;
-  }*/
-
-  /*function decimalToNodeIndex(decimalInteger: number, numNodesPerColumn = 5) {
-    let quotient = decimalInteger;
-    const nodeIndex = [];
-    let currentNodeIndex = 0;
-    for (let i = 0; i < numNodesPerColumn; i++) {
-      const remainder = quotient % (numNodesPerColumn + 1);
-      quotient = (quotient - remainder) / (numNodesPerColumn + 1);
-      nodeIndex.push(currentNodeIndex + remainder);
-      currentNodeIndex += numNodesPerColumn;
-    }
-    return nodeIndex.reverse();
-  }*/
-
-  async function speak(text: string) {
-    return new Promise((resolve) => {
+  function speak(text: string | null) {
+    if (!text) return Promise.resolve(false);
+    return new Promise<boolean>((resolve) => {
       EasySpeech.cancel();
       EasySpeech.speak({
         text: text,
         pitch: 1.0, //0.9,
-        rate: 1.0, //1.2,
+        rate: rate.current, //0.9, //1.2,
         volume: 1.0,
-        lang: lang.current,
-        voice: voice.current,
+        lang: language.current,
+        voice: getVoiceByName(voice.current),
         // there are more events, see the API for supported events
         end: () => resolve(true),
         //boundary: (e) => console.debug("boundary reached"),
       });
     });
+  }
+
+  function handleVoiceChange(voiceChosen: string) {
+    if (voiceChosen) {
+      voice.current = voiceChosen;
+
+      saveSettings(speechSettings);
+      forceUpdate();
+    }
+  }
+
+  function handleLanguageChange(lang: string) {
+    if (lang) {
+      language.current = lang;
+      setVoices(true);
+      saveSettings(speechSettings);
+      forceUpdate();
+    }
+  }
+
+  function getVoiceByName(voiceName: string): SpeechSynthesisVoice | undefined {
+    if (voices.current) {
+      return voices.current.find((v) => v.name === voiceName);
+    }
+    return undefined;
   }
 
   // @ts-ignore
@@ -210,7 +233,7 @@ const App: React.FC = () => {
     forceUpdate();
   });
 
-  function handleVoiceChange(voiceChosen: string) {
+  /*function handleVoiceChange(voiceChosen: string) {
     if (voices) {
       const v: SpeechSynthesisVoice | undefined = voices.find(
         (v) => v.name === voiceChosen
@@ -224,7 +247,7 @@ const App: React.FC = () => {
   }
   function handleSpeedChange(speedChosen: string) {
     speed.current = parseFloat(speedChosen);
-  }
+  }*/
 
   /*function drawAbacus() {
     //const abacus = new Abacus2('abacusCanvas');
@@ -238,26 +261,49 @@ const App: React.FC = () => {
   return (
     <div>
       <p>Current value: {value.current}</p>
-      {getContent() + "=" + result.current}
-      <button
-        onClick={() => {
-          setRun(!run);
+      <IconButton
+        // title={i18n.t('closeButtonDialog')}
+        aria-label="close"
+        onClick={(e) => {
           value.current = 0;
+          read(getContent()).then(() => console.log("read"));
         }}
+        size="large"
       >
-        Run
-      </button>
-      <input
-        defaultValue={speed.current}
-        onChange={(e) => handleSpeedChange(e.target.value)}
+        <PlayCircleFilledWhiteIcon />
+      </IconButton>
+      <IconButton
+        aria-label="settings"
+        style={{
+          position: "absolute",
+          right: 5,
+          top: 5,
+        }}
+        onClick={(e) => setSettingsDialogOpened(true)}
+        size="large"
+      >
+        <SettingsIcon />
+      </IconButton>
+      <SettingsDialog
+        open={isSettingsDialogOpened}
+        onClose={() => setSettingsDialogOpened(false)}
+        handleSpeedChange={(s) => {
+          speed.current = s * 1000;
+          saveSettings(speechSettings);
+        }}
+        handleRateChange={(r) => {
+          rate.current = r;
+          saveSettings(speechSettings);
+        }}
+        handleVoiceChange={handleVoiceChange}
+        handleLanguageChange={handleLanguageChange}
+        languages={languages.current}
+        language={language.current}
+        voices={voices.current}
+        voice={voice.current}
+        rate={rate.current}
+        speed={speed.current}
       />
-      <select onChange={(e) => handleVoiceChange(e.target.value)}>
-        {voices?.map((voice) => (
-          <option key={voice.name} value={voice.name}>
-            {voice.name} {voice.lang}
-          </option>
-        ))}
-      </select>
       <canvas id="abacusCanvas" />
       <div id="myAbacus">
         <canvas id="myAbacus_Abacus" width="680" height="340" />
