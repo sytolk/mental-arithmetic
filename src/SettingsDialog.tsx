@@ -85,7 +85,7 @@ function SettingsDialog(props: Props) {
         <Typography gutterBottom>{i18n.t("speechSpeed")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider
-            defaultValue={props.speed/1000}
+            defaultValue={props.speed / 1000}
             onChange={handleSpeedChange}
             step={0.05}
             min={0.05}

@@ -3,6 +3,8 @@ import React, { useReducer, useState, useEffect, useRef } from "react";
 import EasySpeech from "easy-speech";
 import IconButton from "@mui/material/IconButton";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
+import PauseIcon from "@mui/icons-material/Pause";
+import StopIcon from "@mui/icons-material/Stop";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SettingsIcon from "@mui/icons-material/Settings";
 import i18n from "./i18n";
@@ -28,6 +30,8 @@ const App: React.FC = () => {
   const voice = React.useRef<string>(getSettings("speechVoice"));
   const rate = React.useRef<number>(getDefaultRate());
   const speed = React.useRef<number>(1000);
+  const isPlaying = React.useRef<boolean>(false);
+  const isPaused = React.useRef<boolean>(false);
 
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   // @ts-ignore
@@ -258,20 +262,49 @@ const App: React.FC = () => {
     abacus.init();
   }*/
 
+  const play = () => {
+    if (isPlaying.current) {
+      if (isPaused.current) {
+        isPaused.current = false;
+        EasySpeech.resume();
+        forceUpdate();
+      } else {
+        isPaused.current = true;
+        EasySpeech.pause();
+        forceUpdate();
+      }
+    } else {
+      isPlaying.current = true;
+      value.current = 0;
+      forceUpdate();
+      read(getContent()).then(() => {
+        isPlaying.current = false;
+        isPaused.current = false;
+        forceUpdate();
+        console.log("read");
+      });
+    }
+  };
+  const stop = () => {
+    if (isPlaying.current) {
+      isPlaying.current = false;
+      isPaused.current = false;
+      EasySpeech.cancel();
+      forceUpdate();
+    }
+  };
+
   return (
     <div>
       <p>Current value: {value.current}</p>
-      <IconButton
-        // title={i18n.t('closeButtonDialog')}
-        aria-label="close"
-        onClick={(e) => {
-          value.current = 0;
-          read(getContent()).then(() => console.log("read"));
-        }}
-        size="large"
-      >
-        <PlayCircleFilledWhiteIcon />
+      <IconButton aria-label="play" onClick={play} size="large">
+        {isPlaying.current ? <PauseIcon /> : <PlayCircleFilledWhiteIcon />}
       </IconButton>
+      {isPlaying.current && (
+        <IconButton aria-label="stop" onClick={stop} size="large">
+          <StopIcon />
+        </IconButton>
+      )}
       <IconButton
         aria-label="settings"
         style={{
