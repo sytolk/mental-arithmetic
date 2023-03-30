@@ -1,8 +1,8 @@
 import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
-import IconButton from "@mui/material/IconButton";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
+import { AppBar, IconButton, Toolbar } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -10,7 +10,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import i18n from "./i18n";
 import useEventListener from "./useEventListener";
 import Abacus from "./Abacus.js";
-import { sendMessageToHost } from "./utils";
+import { getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
 import { getSettings, saveSettings } from "./settings";
 
@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const abacus = useRef<any>(new Abacus("myAbacus", 0));
   const result = useRef<number>(-1);
   const value = useRef<number>(0);
+  const currentNumber = useRef<string>('');
 
   const [isSettingsDialogOpened, setSettingsDialogOpened] =
     useState<boolean>(false);
@@ -39,7 +40,8 @@ const App: React.FC = () => {
   // @ts-ignore
   const readOnly = () => !window.editMode;
   // @ts-ignore
-  const getContent = () => window.mdContent || "12 +22 +32 -42 +62";
+  // const getContent = () => //window.mdContent || "12 +22 +32 -42 +62";
+  const sequence = getSequence(5); //window.mdContent || "12 +22 +32 -42 +62";
 
   const speechSettings = {
     speechSpeed: speed.current,
@@ -50,7 +52,7 @@ const App: React.FC = () => {
   useEffect(() => {
     abacus.current.init();
     //drawAbacus();
-    result.current = parse(getContent());
+    result.current = sequence.reduce((a, b) => a + b); // parse(sequence);
 
     EasySpeech.init()
       .then((success: boolean) => {
@@ -97,7 +99,7 @@ const App: React.FC = () => {
     return 0.9;
   }
 
-  function parse(str: string) {
+  /*function parse(str: string) {
     let res = 0;
     const texts = getContent().split(" ");
     for (let i = 0; i < texts.length; i++) {
@@ -105,20 +107,21 @@ const App: React.FC = () => {
     }
     return res;
     // return Function(`'use strict'; return (${str})`)();
-  }
+  }*/
 
   const sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
-  async function read(txt: string) {
-    const texts = txt.split(" ");
-    for (let i = 0; i < texts.length; i++) {
+  async function read(seq: Array<number>) {
+    //const texts = txt.split(" ");
+    for (let i = 0; i < seq.length; i++) {
       await sleep(speed.current); //1000 / rate.current);
-      const txt = texts[i].replaceAll("-", "−");
+      const txt = seq[i] > 0 ? "+" + seq[i] : "−" + seq[i]; //.replaceAll("-", "−");
+      currentNumber.current = txt;
       await speak(txt);
 
-      value.current += parseInt(texts[i], 10);
+      value.current += seq[i]; // parseInt(texts[i], 10);
       forceUpdate();
       // set abacus
       abacus.current.reset();
@@ -277,7 +280,7 @@ const App: React.FC = () => {
       isPlaying.current = true;
       value.current = 0;
       forceUpdate();
-      read(getContent()).then(() => {
+      read(sequence).then(() => {
         isPlaying.current = false;
         isPaused.current = false;
         forceUpdate();
@@ -297,26 +300,36 @@ const App: React.FC = () => {
   return (
     <div>
       <p>Current value: {value.current}</p>
-      <IconButton aria-label="play" onClick={play} size="large">
-        {isPlaying.current ? <PauseIcon /> : <PlayCircleFilledWhiteIcon />}
-      </IconButton>
-      {isPlaying.current && (
-        <IconButton aria-label="stop" onClick={stop} size="large">
-          <StopIcon />
-        </IconButton>
-      )}
-      <IconButton
-        aria-label="settings"
-        style={{
-          position: "absolute",
-          right: 5,
-          top: 5,
-        }}
-        onClick={(e) => setSettingsDialogOpened(true)}
-        size="large"
-      >
-        <SettingsIcon />
-      </IconButton>
+      <AppBar position="static" color="transparent">
+        <Toolbar
+          style={{
+            padding: "0 8px",
+            textOverflow: "ellipsis",
+            backgroundColor: "transparent",
+          }}
+        >
+          <IconButton aria-label="play" onClick={play} size="large">
+            {isPlaying.current ? <PauseIcon /> : <PlayCircleFilledWhiteIcon />}
+          </IconButton>
+          {isPlaying.current && (
+            <IconButton aria-label="stop" onClick={stop} size="large">
+              <StopIcon />
+            </IconButton>
+          )}
+          <IconButton
+            aria-label="settings"
+            style={{
+              position: "absolute",
+              right: 5,
+              top: 5,
+            }}
+            onClick={(e) => setSettingsDialogOpened(true)}
+            size="large"
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
       <SettingsDialog
         open={isSettingsDialogOpened}
         onClose={() => setSettingsDialogOpened(false)}
@@ -337,6 +350,7 @@ const App: React.FC = () => {
         rate={rate.current}
         speed={speed.current}
       />
+      {currentNumber.current}
       <canvas id="abacusCanvas" />
       <div id="myAbacus">
         <canvas id="myAbacus_Abacus" width="680" height="340" />
