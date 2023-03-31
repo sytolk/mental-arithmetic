@@ -1,4 +1,4 @@
-import { processNumbers } from "../utils";
+import { getRandomNumber, processNumbers } from "../utils";
 const { getSequence } = require("../utils");
 
 it("sequence", () => {
@@ -10,6 +10,17 @@ it("sequence", () => {
     expect(sum).toBeGreaterThanOrEqual(0);
   }
 });
+
+/*it("random", () => {
+  const seq = [];
+  for (let i = 0; i < 100; i++) {
+    seq.push(getRandomNumber(1, 9));
+  }
+  for (let i = 0; i < 100; i++) {
+    seq.push(getRandomNumber(-1, -9));
+  }
+  console.log(JSON.stringify(seq));
+});*/
 /*it("get sequence", () => {
   for (let i = 0; i < 10; i++) {
     const seq = getSequence(10, 0);

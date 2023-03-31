@@ -30,6 +30,7 @@ import Dialog from "@mui/material/Dialog";
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import DialogCloseButton from "./DialogCloseButton";
+import { Difficulty, TensLevel } from "./arithmeticTypes";
 
 interface Props {
   open: boolean;
@@ -44,6 +45,9 @@ interface Props {
   language: string;
   rate: number;
   speed: number;
+  seriesCount: number;
+  maxNum: number;
+  difficulty: string;
 }
 
 function SettingsDialog(props: Props) {
@@ -82,6 +86,46 @@ function SettingsDialog(props: Props) {
           minWidth: 400,
         }}
       >
+        <InputLabel shrink htmlFor="difficulty">
+          {i18n.t("difficulty")}
+        </InputLabel>
+        <Select
+          onChange={handleDifficultyChange}
+          input={<OutlinedInput id="difficulty" label={i18n.t("difficulty")} />}
+          fullWidth
+          value={props.difficulty}
+        >
+          <MenuItem value={Difficulty.easy} />
+          <MenuItem value={Difficulty.advanced} />
+        </Select>
+        <Typography gutterBottom>{i18n.t("seriesCount")}</Typography>
+        <div style={{ marginTop: 40 }}>
+          <Slider
+            defaultValue={props.seriesCount}
+            onChange={handleSeriesCountChange}
+            step={1}
+            min={2}
+            max={100}
+            valueLabelDisplay="on"
+          />
+        </div>
+        <InputLabel shrink htmlFor="difficulty">
+          {i18n.t("difficulty")}
+        </InputLabel>
+        <Select
+          onChange={handleMaxNumChange}
+          input={<OutlinedInput id="difficulty" label={i18n.t("difficulty")} />}
+          fullWidth
+          value={props.maxNum}
+        >
+          {Object.entries(TensLevel).map(([key, max]) => (
+            <MenuItem key={key} value={max}>
+              <span style={{ width: "100%" }}>{i18n.t(key)}</span>
+            </MenuItem>
+          ))}
+          <MenuItem value={Difficulty.easy} />
+          <MenuItem value={Difficulty.advanced} />
+        </Select>
         <Typography gutterBottom>{i18n.t("speechSpeed")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider

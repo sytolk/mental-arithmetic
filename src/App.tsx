@@ -2,7 +2,14 @@ import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
-import { AppBar, IconButton, Toolbar } from "@mui/material";
+import {
+  AppBar,
+  IconButton,
+  Toolbar,
+  Box,
+  Card,
+  CardContent,
+} from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -13,12 +20,13 @@ import Abacus from "./Abacus.js";
 import { getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
 import { getSettings, saveSettings } from "./settings";
+import { Difficulty, TensLevel } from "./arithmeticTypes";
 
 const App: React.FC = () => {
   const abacus = useRef<any>(new Abacus("myAbacus", 0));
   const result = useRef<number>(-1);
   const value = useRef<number>(0);
-  const currentNumber = useRef<string>('');
+  const currentNumber = useRef<string>("");
 
   const [isSettingsDialogOpened, setSettingsDialogOpened] =
     useState<boolean>(false);
@@ -30,6 +38,11 @@ const App: React.FC = () => {
   const voices = React.useRef<SpeechSynthesisVoice[] | null>(null);
   const voice = React.useRef<string>(getSettings("speechVoice"));
   const rate = React.useRef<number>(getDefaultRate());
+  const seriesCount = React.useRef<number>(getDefaultSeriesCount());
+  const maxNum = React.useRef<number>(getDefaultMaxNum());
+  const difficulty = React.useRef<string>(
+    getSettings("difficulty") || Difficulty.easy
+  );
   const speed = React.useRef<number>(1000);
   const isPlaying = React.useRef<boolean>(false);
   const isPaused = React.useRef<boolean>(false);
@@ -39,15 +52,20 @@ const App: React.FC = () => {
   const isDarkMode = window.theme && window.theme === "dark";
   // @ts-ignore
   const readOnly = () => !window.editMode;
-  // @ts-ignore
-  // const getContent = () => //window.mdContent || "12 +22 +32 -42 +62";
-  const sequence = getSequence(5); //window.mdContent || "12 +22 +32 -42 +62";
+  const sequence = getSequence(
+    seriesCount.current,
+    maxNum.current,
+    difficulty.current
+  );
 
   const speechSettings = {
     speechSpeed: speed.current,
     speechRate: rate.current,
     speechLanguage: language.current,
     speechVoice: voice.current,
+    seriesCount: seriesCount.current,
+    maxNum: maxNum.current,
+    difficulty: difficulty.current,
   };
   useEffect(() => {
     abacus.current.init();
@@ -99,6 +117,22 @@ const App: React.FC = () => {
     return 0.9;
   }
 
+  function getDefaultSeriesCount(): number {
+    const settings = getSettings("seriesCount");
+    if (settings) {
+      return parseInt(settings);
+    }
+    return 5;
+  }
+
+  function getDefaultMaxNum(): number {
+    const settings = getSettings("maxNum");
+    if (settings) {
+      return parseInt(settings);
+    }
+    return TensLevel.ten;
+  }
+
   /*function parse(str: string) {
     let res = 0;
     const texts = getContent().split(" ");
@@ -117,7 +151,7 @@ const App: React.FC = () => {
     //const texts = txt.split(" ");
     for (let i = 0; i < seq.length; i++) {
       await sleep(speed.current); //1000 / rate.current);
-      const txt = seq[i] > 0 ? "+" + seq[i] : "−" + seq[i]; //.replaceAll("-", "−");
+      const txt = seq[i] > 0 ? "+" + seq[i] : "−" + seq[i] * -1; //.replaceAll("-", "−");
       currentNumber.current = txt;
       await speak(txt);
 
@@ -298,7 +332,17 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        "& > :not(style)": {
+          m: 1,
+          width: "100%",
+          height: "100%",
+        },
+      }}
+    >
       <p>Current value: {value.current}</p>
       <AppBar position="static" color="transparent">
         <Toolbar
@@ -349,13 +393,22 @@ const App: React.FC = () => {
         voice={voice.current}
         rate={rate.current}
         speed={speed.current}
+        difficulty={difficulty.current}
+        maxNum={maxNum.current}
+        seriesCount={seriesCount.current}
       />
-      {currentNumber.current}
-      <canvas id="abacusCanvas" />
-      <div id="myAbacus">
-        <canvas id="myAbacus_Abacus" width="680" height="340" />
-      </div>
-    </div>
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <div style={{ textAlign: "center", fontSize: 136 }}>
+            {currentNumber.current}
+          </div>
+          <div id="myAbacus" style={{ textAlign: "center" }}>
+            {/*<canvas id="myAbacus_Abacus" width="680" height="340" />*/}
+          </div>
+        </CardContent>
+      </Card>
+      {/*<canvas id="abacusCanvas" />*/}
+    </Box>
   );
 };
 
