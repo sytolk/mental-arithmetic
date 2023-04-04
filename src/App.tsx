@@ -240,6 +240,27 @@ const App: React.FC = () => {
       forceUpdate();
     }
   }
+  function handleDifficultyChange(diff: string) {
+    if (difficulty) {
+      difficulty.current = diff;
+      saveSettings(speechSettings);
+      forceUpdate();
+    }
+  }
+  function handleMaxNumChange(num: number) {
+    if (num) {
+      maxNum.current = num;
+      saveSettings(speechSettings);
+      forceUpdate();
+    }
+  }
+  function handleSeriesCountChange(count: number) {
+    if (count) {
+      seriesCount.current = count;
+      saveSettings(speechSettings);
+      forceUpdate();
+    }
+  }
 
   function getVoiceByName(voiceName: string): SpeechSynthesisVoice | undefined {
     if (voices.current) {
@@ -396,6 +417,9 @@ const App: React.FC = () => {
         difficulty={difficulty.current}
         maxNum={maxNum.current}
         seriesCount={seriesCount.current}
+        handleDifficultyChange={handleDifficultyChange}
+        handleMaxNumChange={handleMaxNumChange}
+        handleSeriesCountChange={handleSeriesCountChange}
       />
       <Card sx={{ minWidth: 275 }}>
         <CardContent>

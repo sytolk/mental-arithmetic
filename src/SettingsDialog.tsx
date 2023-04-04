@@ -35,10 +35,13 @@ import { Difficulty, TensLevel } from "./arithmeticTypes";
 interface Props {
   open: boolean;
   onClose: () => void;
+  handleSeriesCountChange: (count: number) => void;
+  handleMaxNumChange: (maxNum: number) => void;
   handleSpeedChange: (speed: number) => void;
   handleRateChange: (rate: number) => void;
   handleVoiceChange: (voice: string) => void;
   handleLanguageChange: (lang: string) => void;
+  handleDifficultyChange: (difficulty: string) => void;
   voice: string;
   voices: SpeechSynthesisVoice[] | null;
   languages: string[] | null;
@@ -52,6 +55,21 @@ interface Props {
 
 function SettingsDialog(props: Props) {
   const { open, onClose } = props;
+
+  const handleDifficultyChange = (event: SelectChangeEvent) => {
+    props.handleDifficultyChange(event.target.value as string);
+  };
+
+  const handleMaxNumChange = (event: SelectChangeEvent) => {
+    props.handleMaxNumChange(parseInt(event.target.value as string, 10));
+  };
+
+  const handleSeriesCountChange = (
+    event: Event,
+    newValue: number | number[]
+  ) => {
+    props.handleSeriesCountChange(newValue as number);
+  };
 
   const handleSpeedChange = (event: Event, newValue: number | number[]) => {
     props.handleSpeedChange(newValue as number);
@@ -95,8 +113,12 @@ function SettingsDialog(props: Props) {
           fullWidth
           value={props.difficulty}
         >
-          <MenuItem value={Difficulty.easy} />
-          <MenuItem value={Difficulty.advanced} />
+          <MenuItem key={Difficulty.easy} value={Difficulty.easy}>
+            <span style={{ width: "100%" }}>{i18n.t(Difficulty.easy)}</span>
+          </MenuItem>
+          <MenuItem key={Difficulty.advanced} value={Difficulty.advanced}>
+            <span style={{ width: "100%" }}>{i18n.t(Difficulty.advanced)}</span>
+          </MenuItem>
         </Select>
         <Typography gutterBottom>{i18n.t("seriesCount")}</Typography>
         <div style={{ marginTop: 40 }}>
@@ -109,22 +131,20 @@ function SettingsDialog(props: Props) {
             valueLabelDisplay="on"
           />
         </div>
-        <InputLabel shrink htmlFor="difficulty">
-          {i18n.t("difficulty")}
+        <InputLabel shrink htmlFor="maxNum">
+          {i18n.t("maxNum")}
         </InputLabel>
         <Select
           onChange={handleMaxNumChange}
-          input={<OutlinedInput id="difficulty" label={i18n.t("difficulty")} />}
+          input={<OutlinedInput id="maxNum" label={i18n.t("maxNum")} />}
           fullWidth
-          value={props.maxNum}
+          value={props.maxNum.toString()}
         >
           {Object.entries(TensLevel).map(([key, max]) => (
             <MenuItem key={key} value={max}>
               <span style={{ width: "100%" }}>{i18n.t(key)}</span>
             </MenuItem>
           ))}
-          <MenuItem value={Difficulty.easy} />
-          <MenuItem value={Difficulty.advanced} />
         </Select>
         <Typography gutterBottom>{i18n.t("speechSpeed")}</Typography>
         <div style={{ marginTop: 40 }}>
