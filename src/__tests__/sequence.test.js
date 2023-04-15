@@ -3,7 +3,7 @@ const { getSequence } = require("../utils");
 
 it("sequence", () => {
   for (let i = 0; i < 10; i++) {
-    const seq = getSequence(100, 0);
+    const seq = getSequence(100, 9);
     console.log(JSON.stringify(seq));
     const sum = seq.reduce((a, b) => a + b);
     // expect(seq.length).toEqual(10);

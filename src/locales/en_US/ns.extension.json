@@ -6,5 +6,9 @@
     "settingsTitle": "Settings",
     "speechSpeed": "Speech speed",
     "voices": "Voices",
+    "minus": "minus",
+    "result": "Result",
+    "check": "Check",
+    "correctResult": "Correct Result",
     "-": "-"
 }

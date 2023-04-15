@@ -7,7 +7,7 @@ let defaultLanguage = enUs;
 
 function loadLocales(options: any, url: string, payload: any, callback: any) {
   switch (url) {
-    case 'bg': {
+    case 'bg-BG': {
       import('./locales/bg/ns.extension.json')
         .then(locale => {
           callback(undefined, { status: '200', data: locale });

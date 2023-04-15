@@ -1,6 +1,8 @@
 import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
+// @ts-ignore
+import writtenNumber from "written-number";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import {
   AppBar,
@@ -9,8 +11,13 @@ import {
   Box,
   Card,
   CardContent,
+  TextField,
+  InputAdornment,
+  Button,
 } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
+import DoneIcon from "@mui/icons-material/Done";
+import ErrorIcon from "@mui/icons-material/Error";
 import StopIcon from "@mui/icons-material/Stop";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -24,9 +31,11 @@ import { Difficulty, TensLevel } from "./arithmeticTypes";
 
 const App: React.FC = () => {
   const abacus = useRef<any>(new Abacus("myAbacus", 0));
-  const result = useRef<number>(-1);
-  const value = useRef<number>(0);
-  const currentNumber = useRef<string>("");
+  // const result = useRef<number>(-1);
+  const valueCalculated = useRef<number>(0);
+  const currentNumber = useRef<number>(0);
+  const currentTxt = useRef<string>("");
+  const isWin = navigator.platform.indexOf("Win") !== -1;
 
   const [isSettingsDialogOpened, setSettingsDialogOpened] =
     useState<boolean>(false);
@@ -46,6 +55,9 @@ const App: React.FC = () => {
   const speed = React.useRef<number>(1000);
   const isPlaying = React.useRef<boolean>(false);
   const isPaused = React.useRef<boolean>(false);
+  const showResult = React.useRef<boolean>(false);
+  const approve = React.useRef<boolean | null>(null);
+  const currentResult = React.useRef<number | null>(null);
 
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   // @ts-ignore
@@ -57,6 +69,7 @@ const App: React.FC = () => {
     maxNum.current,
     difficulty.current
   );
+  console.log(JSON.stringify(sequence));
 
   const speechSettings = {
     speechSpeed: speed.current,
@@ -70,7 +83,7 @@ const App: React.FC = () => {
   useEffect(() => {
     abacus.current.init();
     //drawAbacus();
-    result.current = sequence.reduce((a, b) => a + b); // parse(sequence);
+    // result.current = sequence.reduce((a, b) => a + b); // parse(sequence);
 
     EasySpeech.init()
       .then((success: boolean) => {
@@ -151,15 +164,23 @@ const App: React.FC = () => {
     //const texts = txt.split(" ");
     for (let i = 0; i < seq.length; i++) {
       await sleep(speed.current); //1000 / rate.current);
-      const txt = seq[i] > 0 ? "+" + seq[i] : "−" + seq[i] * -1; //.replaceAll("-", "−");
-      currentNumber.current = txt;
+      const positive = seq[i] > 0 ? seq[i] : seq[i] * -1;
+      const seqTxt = isWin
+        ? writtenNumber(positive, { lang: language.current.split("-")[0] })
+        : positive;
+      const minusSign = isWin ? i18n.t("minus") + " " : "−";
+      const txt = seq[i] > 0 ? "+" + seqTxt : minusSign + seqTxt; //.replaceAll("-", "−");
+      //const txt = seq[i] > 0 ? "+" + seqTxt : "-" + seqTxt; //.replaceAll("-", "−");
+      currentTxt.current = txt;
+      currentNumber.current = seq[i];
+      forceUpdate();
       await speak(txt);
 
-      value.current += seq[i]; // parseInt(texts[i], 10);
-      forceUpdate();
+      valueCalculated.current += seq[i]; // parseInt(texts[i], 10);
+
       // set abacus
       abacus.current.reset();
-      const activatedArray = decimalToNodeIndex(value.current);
+      const activatedArray = decimalToNodeIndex(valueCalculated.current);
       activatedArray.forEach((activated) =>
         abacus.current.setPosition(activated)
       );
@@ -333,11 +354,13 @@ const App: React.FC = () => {
       }
     } else {
       isPlaying.current = true;
-      value.current = 0;
+      valueCalculated.current = 0;
+      approve.current = null;
       forceUpdate();
       read(sequence).then(() => {
         isPlaying.current = false;
         isPaused.current = false;
+        showResult.current = true;
         forceUpdate();
         console.log("read");
       });
@@ -348,6 +371,20 @@ const App: React.FC = () => {
       isPlaying.current = false;
       isPaused.current = false;
       EasySpeech.cancel();
+      forceUpdate();
+    }
+  };
+
+  const handleResultsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    currentResult.current = parseInt(event.target.value, 10);
+  };
+
+  const enterResult = () => {
+    if (currentResult.current) {
+      approve.current = currentResult.current === valueCalculated.current;
+      showResult.current = false;
+      currentNumber.current = 0;
+      currentTxt.current = "";
       forceUpdate();
     }
   };
@@ -364,7 +401,7 @@ const App: React.FC = () => {
         },
       }}
     >
-      <p>Current value: {value.current}</p>
+      {/*<p>Current value: {valueCalculated.current}</p>*/}
       <AppBar position="static" color="transparent">
         <Toolbar
           style={{
@@ -423,8 +460,54 @@ const App: React.FC = () => {
       />
       <Card sx={{ minWidth: 275 }}>
         <CardContent>
-          <div style={{ textAlign: "center", fontSize: 136 }}>
-            {currentNumber.current}
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: 136,
+            }}
+          >
+            {currentNumber.current > 0 && "+" + currentNumber.current}
+            {currentNumber.current < 0 && currentNumber.current}
+            <div style={{ fontSize: 56 }}>{currentTxt.current}</div>
+            {showResult.current && (
+              <div>
+                <TextField
+                  id="result"
+                  label={i18n.t("result")}
+                  variant="outlined"
+                  onChange={handleResultsChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          data-tid="startRenameEntryTID"
+                          color="primary"
+                          onClick={enterResult}
+                        >
+                          {i18n.t("core:check")}
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </div>
+            )}
+            {approve.current !== null &&
+              (approve.current ? (
+                <DoneIcon sx={{ fontSize: 80, color: "green" }} />
+              ) : (
+                <>
+                  {currentResult.current}
+                  <ErrorIcon sx={{ fontSize: 40, color: "red" }} />
+                  <span
+                    style={{
+                      fontSize: 55,
+                    }}
+                  >
+                    {i18n.t("correctResult")} {valueCalculated.current}
+                  </span>
+                </>
+              ))}
           </div>
           <div id="myAbacus" style={{ textAlign: "center" }}>
             {/*<canvas id="myAbacus_Abacus" width="680" height="340" />*/}
