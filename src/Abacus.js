@@ -110,8 +110,8 @@ export default function Abacus(parentDivId, type) {
   const abacusCtrl = new AbacusCtrl(type);
   let canvas;
   const divId = parentDivId;
-  const beadColor = 'rgba(133, 178, 255, 1.0)';
-  const hooveredBeadColor = 'rgba(170, 215, 255, 1.0)';
+  const beadColor = "rgba(133, 178, 255, 1.0)";
+  const hooveredBeadColor = "rgba(170, 215, 255, 1.0)";
   let hooveredElement = -1;
   let hooveredBead = -1;
   const uiElements = [];
@@ -120,16 +120,16 @@ export default function Abacus(parentDivId, type) {
   this.init = function () {
     abacusCtrl.init();
 
-    canvas = document.createElement('canvas');
-    if (!canvas) console.log('Abacus error: can not create a canvas element');
-    canvas.id = parentDivId + '_Abacus';
+    canvas = document.createElement("canvas");
+    if (!canvas) console.log("Abacus error: can not create a canvas element");
+    canvas.id = parentDivId + "_Abacus";
     canvas.width = 40 + abacusCtrl.beadLines * abacusCtrl.beadSpacing;
     canvas.height = 60 + (abacusCtrl.beadPerLine + 2) * abacusCtrl.beadHeight;
     document.body.appendChild(canvas);
     const parent = document.getElementById(divId);
     if (!parent)
       console.log(
-        'Abacus error: can not find an element with the given name: ' + divId
+        "Abacus error: can not find an element with the given name: " + divId
       );
     parent.appendChild(canvas);
 
@@ -164,7 +164,7 @@ export default function Abacus(parentDivId, type) {
       0
     );
 
-    ctx.fillStyle = 'rgba(60, 60, 60, 0.3)';
+    ctx.fillStyle = "rgba(60, 60, 60, 0.3)";
     drawRoundRectFilled(
       ctx,
       dn.x + 4,
@@ -179,16 +179,9 @@ export default function Abacus(parentDivId, type) {
       ctx.fillStyle = hooveredBeadColor;
     }
     drawRoundRectFilled(ctx, dn.x, dn.y, dn.x2 - dn.x, dn.y2 - dn.y, 15);
-    ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+    ctx.fillStyle = "rgba(255, 255, 255, 1.0)";
 
     uiElements.push(dn);
-    /*if (false) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
-      ctx.textAlign = 'left';
-      ctx.font = '10pt sans-serif';
-      ctx.fillText('ID: ' + nodeId, dn.x + 4, dn.y2 - 13);
-      ctx.lineWidth = 1;
-    }*/
   }
 
   function drawBeads(ctx) {
@@ -205,52 +198,11 @@ export default function Abacus(parentDivId, type) {
     canvas.width = canvas.width;
 
     uiElements.length = 0;
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#000000';
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = "#000000";
 
-    // draw grid
-    /*if (false) {
-      ctx.strokeStyle = '#808080';
-      var stepsX = 20.0 - 0.0;
-      var stepsY = 20.0 - 0.0;
-
-      var lx = 0 % stepsX;
-      var ly = 0 % stepsY;
-      var Lx = 0 % (stepsX * 5.0);
-      if (Lx < 0.0) Lx += stepsX * 5.0;
-      var Ly = 0 % (stepsY * 5.0);
-      if (Ly < 0.0) Ly += stepsY * 5.0;
-
-      while (lx < canvas.width) {
-        if (Math.abs(Lx - lx) < 0.001) {
-          ctx.strokeStyle = '#404040';
-          Lx += stepsX * 5.0;
-        } else {
-          ctx.strokeStyle = '#808080';
-        }
-        ctx.beginPath();
-        ctx.moveTo(lx, 0);
-        ctx.lineTo(lx, canvas.height);
-        ctx.stroke();
-        lx += stepsX;
-      }
-
-      while (ly < canvas.height) {
-        if (Math.abs(Ly - ly) < 0.001) {
-          ctx.strokeStyle = '#404040';
-          Ly += stepsY * 5.0;
-        } else {
-          ctx.strokeStyle = '#808080';
-        }
-        ctx.beginPath();
-        ctx.moveTo(0, ly);
-        ctx.lineTo(canvas.width, ly);
-        ctx.stroke();
-        ly += stepsY;
-      }
-    }*/
     // draw frame
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = "#000000";
     ctx.lineWidth = 5;
     for (i = 0; i < abacusCtrl.beadLines; i++) {
       const x =
@@ -282,9 +234,9 @@ export default function Abacus(parentDivId, type) {
     drawBeads(ctx);
 
     // draw value
-    ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
-    ctx.textAlign = 'center';
-    ctx.font = '20pt sans-serif';
+    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
+    ctx.textAlign = "center";
+    ctx.font = "20pt sans-serif";
     const textY = 50 + (abacusCtrl.beadPerLine + 2) * abacusCtrl.beadHeight;
     for (i = 0; i < abacusCtrl.beadLines; i++) {
       const textX =
@@ -396,7 +348,7 @@ export default function Abacus(parentDivId, type) {
     const lineWidthBackup = ctx.lineWidth;
     const strokeStyleBackup = ctx.strokeStyle;
     ctx.strokeStyle = ctx.fillStyle;
-    ctx.lineJoin = 'round';
+    ctx.lineJoin = "round";
     ctx.lineWidth = radius;
     ctx.strokeRect(
       x + radius / 2,

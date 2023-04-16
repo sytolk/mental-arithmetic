@@ -3,18 +3,17 @@
   <head>
     <title>Arithmetic Player for TagSpaces</title>
     <meta charset="UTF-8" />
-    <link href="../../commom/common.css" rel="stylesheet" />
     <script>
       function setContent(content, fileDirectory, editMode) {
         console.log('Content updated, event triggered');
-        window.mdContent = content;
+        window.resultsContent = content;
         window.editMode = !editMode;
         window.fileDirectory = fileDirectory;
         window.dispatchEvent(new Event('contentLoaded'));
       }
 
       function getContent() {
-        return window.mdContent;
+        return window.resultsContent;
       }
 
       function setTheme(theme) {

@@ -26,8 +26,9 @@ import useEventListener from "./useEventListener";
 import Abacus from "./Abacus.js";
 import { getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
-import { getSettings, saveSettings } from "./settings";
+import { getHistoryResults, getSettings, saveSettings } from "./settings";
 import { Difficulty, TensLevel } from "./arithmeticTypes";
+import { HistoryResults } from "./math.types";
 
 const App: React.FC = () => {
   const abacus = useRef<any>(new Abacus("myAbacus", 0));
@@ -53,23 +54,21 @@ const App: React.FC = () => {
     getSettings("difficulty") || Difficulty.easy
   );
   const speed = React.useRef<number>(1000);
+  const sequence = React.useRef<Array<number>>([]);
   const isPlaying = React.useRef<boolean>(false);
   const isPaused = React.useRef<boolean>(false);
   const showResult = React.useRef<boolean>(false);
   const approve = React.useRef<boolean | null>(null);
   const currentResult = React.useRef<number | null>(null);
+  const historyResult = React.useRef<Array<HistoryResults>>(
+    getHistoryResults()
+  );
 
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   // @ts-ignore
   const isDarkMode = window.theme && window.theme === "dark";
   // @ts-ignore
   const readOnly = () => !window.editMode;
-  const sequence = getSequence(
-    seriesCount.current,
-    maxNum.current,
-    difficulty.current
-  );
-  console.log(JSON.stringify(sequence));
 
   const speechSettings = {
     speechSpeed: speed.current,
@@ -291,7 +290,7 @@ const App: React.FC = () => {
   }
 
   // @ts-ignore
-  useEventListener("keydown", (event) => {
+  /*useEventListener("keydown", (event) => {
     if (event.ctrlKey || event.metaKey) {
       if (event.key.toLowerCase() === "s") {
         if (!readOnly()) {
@@ -299,14 +298,14 @@ const App: React.FC = () => {
         }
       }
     }
-  });
+  });*/
 
   // @ts-ignore
-  useEventListener("dblclick", (event) => {
+  /*useEventListener("dblclick", (event) => {
     if (readOnly()) {
       sendMessageToHost({ command: "editDocument" });
     }
-  });
+  });*/
 
   useEventListener("themeChanged", () => {
     forceUpdate();
@@ -357,7 +356,13 @@ const App: React.FC = () => {
       valueCalculated.current = 0;
       approve.current = null;
       forceUpdate();
-      read(sequence).then(() => {
+      sequence.current = getSequence(
+        seriesCount.current,
+        maxNum.current,
+        difficulty.current
+      );
+      console.log(JSON.stringify(sequence.current));
+      read(sequence.current).then(() => {
         isPlaying.current = false;
         isPaused.current = false;
         showResult.current = true;
@@ -380,12 +385,33 @@ const App: React.FC = () => {
   };
 
   const enterResult = () => {
-    if (currentResult.current) {
+    if (currentResult.current !== null) {
       approve.current = currentResult.current === valueCalculated.current;
+
+      const newResults: HistoryResults = {
+        difficulty: difficulty.current,
+        maxNum: maxNum.current,
+        seriesCount: seriesCount.current,
+        speechSpeed: speed.current,
+        timestamp: new Date().getTime(),
+        sequence: sequence.current,
+        resultInput: currentResult.current,
+        result: approve.current,
+      };
+
       showResult.current = false;
       currentNumber.current = 0;
       currentTxt.current = "";
+      currentResult.current = null;
       forceUpdate();
+      // @ts-ignore
+      window.resultsContent = JSON.stringify([...historyResult.current, newResults]);
+
+      sendMessageToHost({
+        command: 'saveDocument',
+        // @ts-ignore
+        filepath: window.fileDirectory
+      });
     }
   };
 
