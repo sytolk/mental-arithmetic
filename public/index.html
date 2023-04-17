@@ -27,7 +27,7 @@
         window.dispatchEvent(new Event('ttsEnd'));
       }
 
-      function getParameterByName(paramName) {
+      function getParameterByName(paramName) { // todo move to utils
         const name = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         const results = regex.exec(location.search);

@@ -24,7 +24,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import i18n from "./i18n";
 import useEventListener from "./useEventListener";
 import Abacus from "./Abacus.js";
-import { getSequence, sendMessageToHost } from "./utils";
+import { getParameterByName, getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
 import { getHistoryResults, getSettings, saveSettings } from "./settings";
 import { Difficulty, TensLevel } from "./arithmeticTypes";
@@ -404,13 +404,21 @@ const App: React.FC = () => {
       currentTxt.current = "";
       currentResult.current = null;
       forceUpdate();
+      historyResult.current = [...historyResult.current, newResults];
       // @ts-ignore
-      window.resultsContent = JSON.stringify([...historyResult.current, newResults]);
+      window.resultsContent = JSON.stringify(historyResult.current);
+
+      const filePath = getParameterByName("file");
+      /*sendMessageToHost({
+        command: "contentChangedInEditor",
+        filepath: filePath,
+      });*/
 
       sendMessageToHost({
-        command: 'saveDocument',
+        command: "saveDocument",
         // @ts-ignore
-        filepath: window.fileDirectory
+        filepath: filePath, //window.fileDirectory
+        force: true
       });
     }
   };

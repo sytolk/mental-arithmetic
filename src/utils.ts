@@ -1,7 +1,21 @@
+/**  Helper functions */
+export function getParameterByName(paramName: string) {
+  const name = paramName.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  const regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+  // @ts-ignore
+  const results = regex.exec(window.location.search);
+  let param =
+    results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  if (param.includes("#")) {
+    param = param.split("#").join("%23");
+  }
+  return param;
+}
+
 export function sendMessageToHost(message: any) {
+  const eventID = getParameterByName("eventID");
   window.parent.postMessage(
-    // @ts-ignore
-    JSON.stringify({ ...message, eventID: window.eventID }),
+    JSON.stringify({ ...message, eventID: eventID }),
     "*"
   );
 }
