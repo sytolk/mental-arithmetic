@@ -31,11 +31,13 @@ import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import DialogCloseButton from "./DialogCloseButton";
 import { Difficulty, TensLevel } from "./arithmeticTypes";
+import { useSettingsContext } from "./hooks/useSettingsContext";
+import { useSpeechContext } from "./hooks/useSpeechContext";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  handleSeriesCountChange: (count: number) => void;
+  /*handleSeriesCountChange: (count: number) => void;
   handleMaxNumChange: (maxNum: number) => void;
   handleSpeedChange: (speed: number) => void;
   handleRateChange: (rate: number) => void;
@@ -50,41 +52,48 @@ interface Props {
   speed: number;
   seriesCount: number;
   maxNum: number;
-  difficulty: string;
+  difficulty: string;*/
 }
 
 function SettingsDialog(props: Props) {
   const { open, onClose } = props;
-
-  const handleDifficultyChange = (event: SelectChangeEvent) => {
-    props.handleDifficultyChange(event.target.value as string);
+  const {
+    speechSettings,
+    handleDifficultyChange,
+    handleMaxNumChange,
+    handleSeriesCountChange,
+    handleSpeedChange,
+    handleRateChange,
+    handleVoiceChange,
+    handleLanguageChange,
+  } = useSettingsContext();
+  const { languages, voices } = useSpeechContext();
+  const difficultyChange = (event: SelectChangeEvent) => {
+    handleDifficultyChange(event.target.value as string);
   };
 
-  const handleMaxNumChange = (event: SelectChangeEvent) => {
-    props.handleMaxNumChange(parseInt(event.target.value as string, 10));
+  const maxNumChange = (event: SelectChangeEvent) => {
+    handleMaxNumChange(parseInt(event.target.value as string, 10));
   };
 
-  const handleSeriesCountChange = (
-    event: Event,
-    newValue: number | number[]
-  ) => {
-    props.handleSeriesCountChange(newValue as number);
+  const seriesCountChange = (event: Event, newValue: number | number[]) => {
+    handleSeriesCountChange(newValue as number);
   };
 
-  const handleSpeedChange = (event: Event, newValue: number | number[]) => {
-    props.handleSpeedChange(newValue as number);
+  const speedChange = (event: Event, newValue: number | number[]) => {
+    handleSpeedChange(newValue as number);
   };
 
-  const handleRateChange = (event: Event, newValue: number | number[]) => {
-    props.handleRateChange(newValue as number);
+  const rateChange = (event: Event, newValue: number | number[]) => {
+    handleRateChange(newValue as number);
   };
 
-  const handleVoiceChange = (event: SelectChangeEvent) => {
-    props.handleVoiceChange(event.target.value as string);
+  const voiceChange = (event: SelectChangeEvent) => {
+    handleVoiceChange(event.target.value as string);
   };
 
-  const handleLanguageChange = (event: SelectChangeEvent) => {
-    props.handleLanguageChange(event.target.value as string);
+  const languageChange = (event: SelectChangeEvent) => {
+    handleLanguageChange(event.target.value as string);
   };
 
   const displayNames = new Intl.DisplayNames(["en"], { type: "language" });
@@ -108,10 +117,10 @@ function SettingsDialog(props: Props) {
           {i18n.t("difficulty")}
         </InputLabel>
         <Select
-          onChange={handleDifficultyChange}
+          onChange={difficultyChange}
           input={<OutlinedInput id="difficulty" label={i18n.t("difficulty")} />}
           fullWidth
-          value={props.difficulty}
+          value={speechSettings.difficulty}
         >
           <MenuItem key={Difficulty.easy} value={Difficulty.easy}>
             <span style={{ width: "100%" }}>{i18n.t(Difficulty.easy)}</span>
@@ -123,8 +132,8 @@ function SettingsDialog(props: Props) {
         <Typography gutterBottom>{i18n.t("seriesCount")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider
-            defaultValue={props.seriesCount}
-            onChange={handleSeriesCountChange}
+            defaultValue={speechSettings.seriesCount}
+            onChange={seriesCountChange}
             step={1}
             min={2}
             max={100}
@@ -135,10 +144,10 @@ function SettingsDialog(props: Props) {
           {i18n.t("maxNum")}
         </InputLabel>
         <Select
-          onChange={handleMaxNumChange}
+          onChange={maxNumChange}
           input={<OutlinedInput id="maxNum" label={i18n.t("maxNum")} />}
           fullWidth
-          value={props.maxNum.toString()}
+          value={speechSettings.maxNum.toString()}
         >
           {Object.entries(TensLevel).map(([key, max]) => (
             <MenuItem key={key} value={max}>
@@ -149,8 +158,8 @@ function SettingsDialog(props: Props) {
         <Typography gutterBottom>{i18n.t("speechSpeed")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider
-            defaultValue={props.speed / 1000}
-            onChange={handleSpeedChange}
+            defaultValue={speechSettings.speechSpeed / 1000}
+            onChange={speedChange}
             step={0.05}
             min={0.05}
             max={10}
@@ -159,8 +168,8 @@ function SettingsDialog(props: Props) {
         </div>
         <div style={{ marginTop: 40 }}>
           <Slider
-            defaultValue={props.rate}
-            onChange={handleRateChange}
+            defaultValue={speechSettings.speechRate}
+            onChange={rateChange}
             step={0.25}
             min={0}
             max={5}
@@ -171,14 +180,14 @@ function SettingsDialog(props: Props) {
           {i18n.t("languages")}
         </InputLabel>
         <Select
-          onChange={handleLanguageChange}
+          onChange={languageChange}
           input={<OutlinedInput id="languages" label={i18n.t("languages")} />}
           displayEmpty
           fullWidth
-          value={props.language}
+          value={speechSettings.speechLanguage}
         >
           <MenuItem value={""} style={{ display: "none" }} />
-          {props.languages?.map((lang) => (
+          {languages?.map((lang) => (
             <MenuItem key={lang} value={lang}>
               <span style={{ width: "100%" }}>
                 {lang} - {displayNames.of(lang)}
@@ -191,14 +200,14 @@ function SettingsDialog(props: Props) {
           {i18n.t("voices")}
         </InputLabel>
         <Select
-          onChange={handleVoiceChange}
+          onChange={voiceChange}
           input={<OutlinedInput id="voices" label={i18n.t("voices")} />}
           displayEmpty
           fullWidth
-          value={props.voice}
+          value={speechSettings.speechVoice}
         >
           <MenuItem value={""} style={{ display: "none" }} />
-          {props.voices?.map((voice) => (
+          {voices?.map((voice) => (
             <MenuItem key={voice.name} value={voice.name}>
               <span style={{ width: "100%" }}>
                 {voice.name} {voice.lang}

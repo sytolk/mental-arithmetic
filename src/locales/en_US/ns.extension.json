@@ -10,5 +10,6 @@
     "result": "Result",
     "check": "Check",
     "correctResult": "Correct Result",
+    "autoResult": "Set Result in Abacus",
     "-": "-"
 }

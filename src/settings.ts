@@ -1,7 +1,9 @@
 import { HistoryResults } from "./math.types";
+import { SettingsType } from "./hooks/SettingsContextProvider";
 
-export function saveSettings(settings: any) {
+export function saveSettings(settings: SettingsType) {
   localStorage.setItem("mathSettings", JSON.stringify(settings));
+  return settings;
 }
 
 export function getSettings(key: string) {

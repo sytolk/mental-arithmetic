@@ -29,7 +29,7 @@ export function getSequence(
   n: number,
   maxNum: number = 9,
   difficulty = "Easy"
-) {
+): number[] {
   let sequence = [];
   let sum = 0;
   for (let i = 0; i < n; i++) {
