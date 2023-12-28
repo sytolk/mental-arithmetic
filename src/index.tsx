@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import i18n from "./i18n";
 import App from "./App";
 import { sendMessageToHost } from "./utils";
@@ -11,9 +11,13 @@ import { SettingsContextProvider } from "./hooks/SettingsContextProvider";
 sendMessageToHost({ command: "loadDefaultTextContent" });
 
 // @ts-ignore
-i18n.changeLanguage(window.locale);
-
-ReactDOM.render(
+if (window.locale) {
+  // @ts-ignore
+  i18n.changeLanguage(window.locale);
+}
+const container = document.getElementById("root") as HTMLElement;
+const root = createRoot(container);
+root.render(
   <React.StrictMode>
     <SettingsContextProvider>
       <AbacusContextProvider>
@@ -22,6 +26,5 @@ ReactDOM.render(
         </SpeechContextProvider>
       </AbacusContextProvider>
     </SettingsContextProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import i18n from "./i18n";
+import { useTranslation } from 'react-i18next';
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
@@ -57,6 +57,7 @@ interface Props {
 
 function SettingsDialog(props: Props) {
   const { open, onClose } = props;
+  const {t} = useTranslation();
   const {
     speechSettings,
     handleDifficultyChange,
@@ -105,7 +106,7 @@ function SettingsDialog(props: Props) {
       aria-labelledby="settings-dialog-title"
     >
       <DialogTitle id="settings-dialog-title">
-        {i18n.t("settingsTitle")}
+        {t("settingsTitle")}
         <DialogCloseButton onClick={onClose} />
       </DialogTitle>
       <DialogContent
@@ -114,22 +115,22 @@ function SettingsDialog(props: Props) {
         }}
       >
         <InputLabel shrink htmlFor="difficulty">
-          {i18n.t("difficulty")}
+          {t("difficulty")}
         </InputLabel>
         <Select
           onChange={difficultyChange}
-          input={<OutlinedInput id="difficulty" label={i18n.t("difficulty")} />}
+          input={<OutlinedInput id="difficulty" label={t("difficulty")} />}
           fullWidth
           value={speechSettings.difficulty}
         >
           <MenuItem key={Difficulty.easy} value={Difficulty.easy}>
-            <span style={{ width: "100%" }}>{i18n.t(Difficulty.easy)}</span>
+            <span style={{ width: "100%" }}>{t(Difficulty.easy)}</span>
           </MenuItem>
           <MenuItem key={Difficulty.advanced} value={Difficulty.advanced}>
-            <span style={{ width: "100%" }}>{i18n.t(Difficulty.advanced)}</span>
+            <span style={{ width: "100%" }}>{t(Difficulty.advanced)}</span>
           </MenuItem>
         </Select>
-        <Typography gutterBottom>{i18n.t("seriesCount")}</Typography>
+        <Typography gutterBottom>{t("seriesCount")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider
             defaultValue={speechSettings.seriesCount}
@@ -141,27 +142,27 @@ function SettingsDialog(props: Props) {
           />
         </div>
         <InputLabel shrink htmlFor="maxNum">
-          {i18n.t("maxNum")}
+          {t("maxNum")}
         </InputLabel>
         <Select
           onChange={maxNumChange}
-          input={<OutlinedInput id="maxNum" label={i18n.t("maxNum")} />}
+          input={<OutlinedInput id="maxNum" label={t("maxNum")} />}
           fullWidth
           value={speechSettings.maxNum.toString()}
         >
           {Object.entries(TensLevel).map(([key, max]) => (
             <MenuItem key={key} value={max}>
-              <span style={{ width: "100%" }}>{i18n.t(key)}</span>
+              <span style={{ width: "100%" }}>{t(key)}</span>
             </MenuItem>
           ))}
         </Select>
-        <Typography gutterBottom>{i18n.t("speechSpeed")}</Typography>
+        <Typography gutterBottom>{t("speechSpeed")}</Typography>
         <div style={{ marginTop: 40 }}>
           <Slider
-            defaultValue={speechSettings.speechSpeed / 1000}
+            defaultValue={speechSettings.speechSpeed}
             onChange={speedChange}
             step={0.05}
-            min={0.05}
+            min={0.00}
             max={10}
             valueLabelDisplay="on"
           />
@@ -172,16 +173,16 @@ function SettingsDialog(props: Props) {
             onChange={rateChange}
             step={0.25}
             min={0}
-            max={5}
+            max={2}
             valueLabelDisplay="on"
           />
         </div>
         <InputLabel shrink htmlFor="languages">
-          {i18n.t("languages")}
+          {t("languages")}
         </InputLabel>
         <Select
           onChange={languageChange}
-          input={<OutlinedInput id="languages" label={i18n.t("languages")} />}
+          input={<OutlinedInput id="languages" label={t("languages")} />}
           displayEmpty
           fullWidth
           value={speechSettings.speechLanguage}
@@ -197,11 +198,11 @@ function SettingsDialog(props: Props) {
         </Select>
 
         <InputLabel shrink htmlFor="voices">
-          {i18n.t("voices")}
+          {t("voices")}
         </InputLabel>
         <Select
           onChange={voiceChange}
-          input={<OutlinedInput id="voices" label={i18n.t("voices")} />}
+          input={<OutlinedInput id="voices" label={t("voices")} />}
           displayEmpty
           fullWidth
           value={speechSettings.speechVoice}

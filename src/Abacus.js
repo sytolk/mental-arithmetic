@@ -116,37 +116,41 @@ export default function Abacus(parentDivId, type) {
   let hooveredBead = -1;
   const uiElements = [];
   const that = this;
+  let isInitialized = false;
 
   this.init = function () {
-    abacusCtrl.init();
+    if (!isInitialized) {
+      isInitialized = true;
+      abacusCtrl.init();
 
-    canvas = document.createElement("canvas");
-    if (!canvas) console.log("Abacus error: can not create a canvas element");
-    canvas.id = parentDivId + "_Abacus";
-    canvas.width = 40 + abacusCtrl.beadLines * abacusCtrl.beadSpacing;
-    canvas.height = 60 + (abacusCtrl.beadPerLine + 2) * abacusCtrl.beadHeight;
-    document.body.appendChild(canvas);
-    const parent = document.getElementById(divId);
-    if (!parent)
-      console.log(
-        "Abacus error: can not find an element with the given name: " + divId
-      );
-    parent.appendChild(canvas);
+      canvas = document.createElement("canvas");
+      if (!canvas) console.log("Abacus error: can not create a canvas element");
+      canvas.id = parentDivId + "_Abacus";
+      canvas.width = 40 + abacusCtrl.beadLines * abacusCtrl.beadSpacing;
+      canvas.height = 60 + (abacusCtrl.beadPerLine + 2) * abacusCtrl.beadHeight;
+      document.body.appendChild(canvas);
+      const parent = document.getElementById(divId);
+      if (!parent)
+        console.log(
+          "Abacus error: can not find an element with the given name: " + divId
+        );
+      parent.appendChild(canvas);
 
-    canvas.onmousedown = function (event) {
-      canvasMouseDown(event);
-    };
-    canvas.onmousemove = function (event) {
-      canvasMouseMove(event);
-    };
-    canvas.onmouseup = function (event) {
-      canvasMouseUp(event);
-    };
-    canvas.onmouseup = function (event) {
-      canvasMouseUp(event);
-    };
+      canvas.onmousedown = function (event) {
+        canvasMouseDown(event);
+      };
+      canvas.onmousemove = function (event) {
+        canvasMouseMove(event);
+      };
+      canvas.onmouseup = function (event) {
+        canvasMouseUp(event);
+      };
+      canvas.onmouseup = function (event) {
+        canvasMouseUp(event);
+      };
 
-    this.update();
+      this.update();
+    }
   };
 
   function drawBead(nodeId, ctx) {

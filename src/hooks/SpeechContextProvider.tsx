@@ -26,8 +26,7 @@ import React, {
 // @ts-ignore
 import writtenNumber from "written-number";
 import EasySpeech from "easy-speech";
-import i18n from "../i18n";
-import { getSequence } from "../utils";
+import { useTranslation } from "react-i18next";
 import { useAbacusContext } from "./useAbacusContext";
 import { useSettingsContext } from "./useSettingsContext";
 
@@ -64,6 +63,7 @@ export type SpeechContextProviderProps = {
 export const SpeechContextProvider = ({
   children,
 }: SpeechContextProviderProps) => {
+  const { t } = useTranslation();
   const { syncResults } = useAbacusContext();
   const { speechSettings, handleVoiceChange } = useSettingsContext();
 
@@ -76,8 +76,8 @@ export const SpeechContextProvider = ({
   const allVoices = React.useRef<SpeechSynthesisVoice[] | null>(null);
   const voices = React.useRef<SpeechSynthesisVoice[] | null>(null);
 
-  const valueCalculated = useRef<number>(0);
-  const showResult = React.useRef<boolean>(false);
+  const valueCalculated = useRef<number | null>(null);
+  const showResult = useRef<boolean>(false);
   const currentNumber = useRef<number | null>(null);
   const currentTxt = useRef<string>("");
 
@@ -86,16 +86,18 @@ export const SpeechContextProvider = ({
   useEffect(() => {
     EasySpeech.init({ maxTimeout: 5000, interval: 250 })
       .then((success: boolean) => {
+        console.debug("EasySpeech load complete " + success);
         if (success) {
           allVoices.current = EasySpeech.voices();
           setVoices(speechSettings.speechLanguage);
         }
       })
       .catch((e: Error) => console.error(e));
+    // EasySpeech.debug((debug) => console.log(debug));
   }, []);
 
   useEffect(() => {
-    setVoices(speechSettings.speechLanguage);
+    setVoices(speechSettings.speechLanguage, true);
   }, [speechSettings.speechLanguage]);
 
   function setVoices(language: string, chooseFirst = false) {
@@ -139,7 +141,7 @@ export const SpeechContextProvider = ({
       currentNumber.current = null;
       isPlaying.current = true;
       valueCalculated.current = 0;
-      syncResults(valueCalculated.current);
+      syncResults(0);
       // approve.current = null;
       //forceUpdate();
       sequence.current = seq;
@@ -164,49 +166,76 @@ export const SpeechContextProvider = ({
   };
 
   const sleep = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms * 1000));
   };
 
   const read = useMemo(() => {
     return async (seq: Array<number>) => {
       for (let i = 0; i < seq.length; i++) {
-        await sleep(speechSettings.speechSpeed); //1000 / rate.current);
+        if (speechSettings.speechSpeed > 0) {
+          await sleep(speechSettings.speechSpeed);
+        }
         const positive = seq[i] > 0 ? seq[i] : seq[i] * -1;
         const seqTxt = isWin
           ? writtenNumber(positive, {
               lang: speechSettings.speechLanguage.split("-")[0],
             })
           : positive;
-        const minusSign = isWin ? i18n.t("minus") + " " : "−";
+        const minusSign = isWin ? t("minus") + " " : "−";
         const txt = seq[i] > 0 ? "+" + seqTxt : minusSign + seqTxt; //.replaceAll("-", "−");
         //const txt = seq[i] > 0 ? "+" + seqTxt : "-" + seqTxt; //.replaceAll("-", "−");
         currentTxt.current = txt;
         currentNumber.current = seq[i];
         forceUpdate();
-        await speak(txt);
+        try {
+          await speak(
+            txt,
+            speechSettings.speechRate,
+            speechSettings.speechVoice
+          );
+        } catch (err) {
+          console.log(err);
+        }
 
-        valueCalculated.current += seq[i]; // parseInt(texts[i], 10);
+        valueCalculated.current = valueCalculated.current
+          ? valueCalculated.current + seq[i]
+          : seq[i]; // parseInt(texts[i], 10);
 
         syncResults(valueCalculated.current);
+        forceUpdate();
       }
     };
-  }, [syncResults]);
+  }, [syncResults, speechSettings]);
 
-  function speak(text: string | null) {
+  function speak(text: string | null, rate: number, voice: string) {
     if (!text) return Promise.resolve(false);
-    return new Promise<boolean>((resolve) => {
-      EasySpeech.cancel();
-      return EasySpeech.speak({
-        text: text,
-        pitch: 1.0, //0.9,
-        rate: speechSettings.speechRate, //0.9, //1.2,
-        volume: 1.0,
-        //lang: language.current,
-        voice: getVoiceByName(speechSettings.speechVoice),
-        // there are more events, see the API for supported events
-        end: () => resolve(true),
-        //boundary: (e) => console.debug("boundary reached"),
-      });
+    // Create a promise that resolves after the specified timeout
+    const timeoutPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ error: "Speech synthesis timed out" });
+      }, 10000);
+    });
+
+    //return new Promise<boolean>((resolve) => {
+    EasySpeech.cancel();
+    const speechPromise = EasySpeech.speak({
+      text: text,
+      pitch: 1.0, //0.9,
+      rate: rate, //0.9, //1.2,
+      volume: 1.0,
+      //lang: language.current,
+      voice: getVoiceByName(voice),
+      // there are more events, see the API for supported events
+      // end: () => resolve(true),
+      //boundary: (e) => console.debug("boundary reached"),
+    });
+    // });
+    // Use Promise.race to return the result of the first promise to resolve
+    return Promise.race([speechPromise, timeoutPromise]).then((err) => {
+      if (err.error) {
+        console.log(err);
+      }
+      return true;
     });
   }
 
@@ -232,6 +261,7 @@ export const SpeechContextProvider = ({
     };
   }, [
     syncResults,
+    speechSettings,
     isPlaying.current,
     languages.current,
     voices.current,

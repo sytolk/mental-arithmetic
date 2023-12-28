@@ -1,9 +1,8 @@
 import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
-// @ts-ignore
-import writtenNumber from "written-number";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
+import { useTranslation } from 'react-i18next';
 import {
   AppBar,
   IconButton,
@@ -23,7 +22,6 @@ import ErrorIcon from "@mui/icons-material/Error";
 import StopIcon from "@mui/icons-material/Stop";
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SettingsIcon from "@mui/icons-material/Settings";
-import i18n from "./i18n";
 import useEventListener from "./useEventListener";
 import { getParameterByName, getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
@@ -35,6 +33,7 @@ import { useSpeechContext } from "./hooks/useSpeechContext";
 import { useSettingsContext } from "./hooks/useSettingsContext";
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const { abacusParentDivId } = useAbacusContext();
   const {
     currentNumber,
@@ -140,6 +139,7 @@ const App: React.FC = () => {
   };
 
   return (
+    /*<I18nextProvider i18n={i18n}>*/
     <Box
       sx={{
         display: "flex",
@@ -223,7 +223,7 @@ const App: React.FC = () => {
               <TextField
                 id="result"
                 sx={{ marginTop: "20px" }}
-                label={i18n.t("result")}
+                label={t("result")}
                 variant="outlined"
                 onChange={handleResultsChange}
                 InputProps={{
@@ -234,7 +234,7 @@ const App: React.FC = () => {
                         color="primary"
                         onClick={enterResult}
                       >
-                        {i18n.t("core:check")}
+                        {t("core:check")}
                       </Button>
                     </InputAdornment>
                   ),
@@ -254,7 +254,7 @@ const App: React.FC = () => {
                       fontSize: 55,
                     }}
                   >
-                    {i18n.t("correctResult") + ": "} {valueCalculated}
+                    {t("correctResult") + ": "} {valueCalculated}
                   </span>
                 </div>
               ))}

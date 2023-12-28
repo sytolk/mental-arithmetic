@@ -1,4 +1,5 @@
 import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 import HttpApi from "i18next-http-backend";
 import LanguageDetector from "i18next-browser-languagedetector";
 import enUs from "./locales/en_US/ns.extension.json";
@@ -35,7 +36,7 @@ const options = {
 
 i18n.use(HttpApi).use(LanguageDetector);
 if (!i18n.isInitialized) {
-  i18n.init(options, (err, t) => {
+  i18n.use(initReactI18next).init(options, (err, t) => {
     if (err) {
       return console.log("something went wrong loading", err);
     }

@@ -18,7 +18,7 @@
 
 import React, { createContext, useMemo, useReducer } from "react";
 import { getSettings, saveSettings } from "../settings";
-import i18n from "../i18n";
+import { useTranslation } from "react-i18next";
 import { Difficulty, TensLevel } from "../arithmeticTypes";
 
 type SettingsContextData = {
@@ -64,8 +64,9 @@ export type SettingsType = {
 export const SettingsContextProvider = ({
   children,
 }: SettingsContextProviderProps) => {
-  const autoResults = React.useRef<boolean>(true);
-  const speed = React.useRef<number>(1000);
+  const { i18n } = useTranslation();
+  const autoResults = React.useRef<boolean>(getDefaultAutoResults());
+  const speed = React.useRef<number>(getDefaultSpeed());
   const rate = React.useRef<number>(getDefaultRate());
   const language = React.useRef<string>(
     getSettings("speechLanguage") || i18n.language
@@ -97,7 +98,7 @@ export const SettingsContextProvider = ({
   }
 
   function handleSpeedChange(speechSpeed: number) {
-    if (speechSpeed) {
+    if (speechSpeed != undefined) {
       speed.current = speechSpeed;
       speechSettings = saveSettings({
         ...speechSettings,
@@ -108,7 +109,7 @@ export const SettingsContextProvider = ({
   }
 
   function handleRateChange(speechRate: number) {
-    if (speechRate) {
+    if (speechRate !== undefined) {
       rate.current = speechRate;
       speechSettings = saveSettings({
         ...speechSettings,
@@ -159,6 +160,22 @@ export const SettingsContextProvider = ({
       speechSettings = saveSettings({ ...speechSettings, seriesCount: count });
       forceUpdate();
     }
+  }
+
+  function getDefaultAutoResults(): boolean {
+    const settingsAutoResults = getSettings("autoResults");
+    if (settingsAutoResults) {
+      return Boolean(settingsAutoResults);
+    }
+    return true;
+  }
+
+  function getDefaultSpeed(): number {
+    const settingsSpeed = getSettings("speechSpeed");
+    if (settingsSpeed) {
+      return parseFloat(settingsSpeed);
+    }
+    return 0.05; //1000;
   }
 
   function getDefaultRate(): number {

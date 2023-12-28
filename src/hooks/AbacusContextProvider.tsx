@@ -18,7 +18,7 @@
 
 import React, { createContext, useEffect, useMemo, useRef } from "react";
 import Abacus from "../Abacus";
-import {useSettingsContext} from "./useSettingsContext";
+import { useSettingsContext } from "./useSettingsContext";
 
 type AbacusContextData = {
   abacusParentDivId: string;
@@ -27,7 +27,7 @@ type AbacusContextData = {
 };
 
 export const AbacusContext = createContext<AbacusContextData>({
-  abacusParentDivId: 'abacusId',
+  abacusParentDivId: "abacusId",
   abacus: undefined,
   syncResults: () => {},
 });
@@ -39,7 +39,7 @@ export type AbacusContextProviderProps = {
 export const AbacusContextProvider = ({
   children,
 }: AbacusContextProviderProps) => {
-  const abacusParentDivId = "abacusId"
+  const abacusParentDivId = "abacusId";
   const abacus = useRef<any>(new Abacus(abacusParentDivId, 0));
   const { speechSettings } = useSettingsContext();
 
@@ -52,7 +52,12 @@ export const AbacusContextProvider = ({
     const maxDecimalValue = Math.pow(10, numColumns) - 1;
     // Handle out-of-range input values
     if (decimalInteger < 0 || decimalInteger > maxDecimalValue) {
-      throw new Error("Input value out of range");
+      throw new Error(
+        "Input value out of range " +
+          decimalInteger +
+          " maxDecimalValue:" +
+          maxDecimalValue
+      );
     }
 
     // Convert the decimal integer to an array of digits
