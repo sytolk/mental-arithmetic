@@ -2,23 +2,20 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpApi from "i18next-http-backend";
 import LanguageDetector from "i18next-browser-languagedetector";
-import enUs from "./locales/en_US/ns.extension.json";
+import enUs from "./locales/en-US/ns.extension.json";
 
 let defaultLanguage = enUs;
 
 function loadLocales(options: any, url: string, payload: any, callback: any) {
-  if (url === "bg" || url === "bg-BG") {
-    import("./locales/bg/ns.extension.json")
-      .then((locale) => {
-        callback(undefined, { status: "200", data: locale });
-        return true;
-      })
-      .catch(() => {
-        console.log("Error loading " + url + " locale.");
-      });
-  } else {
-    callback(undefined, { status: "200", data: defaultLanguage });
-  }
+  import("./locales/" + url + "/ns.extension.json")
+    .then((locale) => {
+      callback(undefined, { status: "200", data: locale });
+      return true;
+    })
+    .catch(() => {
+      console.log("Error loading " + url + " locale.");
+      callback(undefined, { status: "200", data: defaultLanguage });
+    });
 }
 
 const options = {

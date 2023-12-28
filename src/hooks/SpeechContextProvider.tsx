@@ -63,7 +63,7 @@ export type SpeechContextProviderProps = {
 export const SpeechContextProvider = ({
   children,
 }: SpeechContextProviderProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { syncResults } = useAbacusContext();
   const { speechSettings, handleVoiceChange } = useSettingsContext();
 
@@ -178,7 +178,7 @@ export const SpeechContextProvider = ({
         const positive = seq[i] > 0 ? seq[i] : seq[i] * -1;
         const seqTxt = isWin
           ? writtenNumber(positive, {
-              lang: speechSettings.speechLanguage.split("-")[0],
+              lang: i18n.language.split("-")[0] //speechSettings.speechLanguage.split("-")[0],
             })
           : positive;
         const minusSign = isWin ? t("minus") + " " : "−";

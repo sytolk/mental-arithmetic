@@ -20,6 +20,7 @@ import React, { createContext, useMemo, useReducer } from "react";
 import { getSettings, saveSettings } from "../settings";
 import { useTranslation } from "react-i18next";
 import { Difficulty, TensLevel } from "../arithmeticTypes";
+import i18n from "../i18n";
 
 type SettingsContextData = {
   speechSettings: SettingsType;
@@ -132,6 +133,7 @@ export const SettingsContextProvider = ({
 
   function handleLanguageChange(lang: string) {
     if (lang) {
+      i18n.changeLanguage(lang);
       language.current = lang;
       speechSettings = saveSettings({
         ...speechSettings,
