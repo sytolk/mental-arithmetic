@@ -18,7 +18,7 @@ if (window.locale) {
 const container = document.getElementById("root") as HTMLElement;
 const root = createRoot(container);
 // https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues/2395#issuecomment-651328378
-const App = require('./App').default;
+const App = require("./App").default;
 root.render(
   <React.StrictMode>
     <SettingsContextProvider>

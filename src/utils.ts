@@ -47,7 +47,7 @@ export function getSequence(
       }
     }
     if (difficulty === "Easy") {
-      num = easyProcessor(sum, num);
+      num = easyProcessNumber(sum, num);
     }
     sequence.push(num);
     sum += num;
@@ -55,7 +55,28 @@ export function getSequence(
   return sequence; // validateNumbers(sequence, maxNum);
 }
 
-export function easyProcessor(sum: number, num: number): number {
+// Function to convert a number into an array of its digits
+function getDigitsArray(number: number) {
+  return Array.from(String(number), Number);
+}
+
+function easyProcessNumber(sum: number, num: number): number {
+  const numSign = Math.sign(num);
+  const numberArray = getDigitsArray(Math.abs(num));
+  const sumArray = getDigitsArray(sum);
+  if (numberArray.length > 1) {
+    let num = "";
+    for (let i = 0; i < numberArray.length; i++) {
+      const currentSum = sumArray[i] ? sumArray[i] : 0;
+      num = num + Math.abs(easyProcessor(currentSum, numberArray[i] * numSign));
+    }
+    return parseInt(num, 10) * numSign;
+  } else {
+    return easyProcessor(sum, num);
+  }
+}
+
+function easyProcessor(sum: number, num: number): number {
   if (sum === 1) {
     if (num === 4) {
       num = 5;

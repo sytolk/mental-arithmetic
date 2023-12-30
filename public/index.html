@@ -5,11 +5,11 @@
     <meta charset="UTF-8" />
     <script>
       function setContent(content, fileDirectory, editMode) {
-        console.log('Content updated, event triggered');
+        console.log("Content updated, event triggered");
         window.resultsContent = content;
         window.editMode = !editMode;
         window.fileDirectory = fileDirectory;
-        window.dispatchEvent(new Event('contentLoaded'));
+        window.dispatchEvent(new Event("contentLoaded"));
       }
 
       function getContent() {
@@ -18,42 +18,43 @@
 
       function setTheme(theme) {
         document.documentElement.className = theme;
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute("data-theme", theme);
         window.theme = theme;
-        window.dispatchEvent(new Event('themeChanged'));
+        window.dispatchEvent(new Event("themeChanged"));
       }
 
       function ttsEnd() {
-        window.dispatchEvent(new Event('ttsEnd'));
+        window.dispatchEvent(new Event("ttsEnd"));
       }
 
-      function getParameterByName(paramName) { // todo move to utils
-        const name = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      function getParameterByName(paramName) {
+        // todo move to utils
+        const name = paramName.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        const regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
         const results = regex.exec(location.search);
         let param =
           results === null
-            ? ''
-            : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        if (param.includes('#')) {
-          param = param.split('#').join('%23');
+            ? ""
+            : decodeURIComponent(results[1].replace(/\+/g, " "));
+        if (param.includes("#")) {
+          param = param.split("#").join("%23");
         }
         return param;
       }
 
-      const rootEl = document.querySelector(':root');
-      const primaryColor = getParameterByName('primecolor').replace('%23', '#');
-      const textColor = getParameterByName('textcolor').replace('%23', '#');
-      primaryColor && rootEl.style.setProperty('--primary-color', primaryColor);
-      textColor && rootEl.style.setProperty('--primary-text-color', textColor);
+      const rootEl = document.querySelector(":root");
+      const primaryColor = getParameterByName("primecolor").replace("%23", "#");
+      const textColor = getParameterByName("textcolor").replace("%23", "#");
+      primaryColor && rootEl.style.setProperty("--primary-color", primaryColor);
+      textColor && rootEl.style.setProperty("--primary-text-color", textColor);
 
-      const pathToFile = getParameterByName('file');
+      const pathToFile = getParameterByName("file");
       window.isWeb =
-        (document.URL.startsWith('http') &&
-          !document.URL.startsWith('http://localhost:1212/')) ||
-        pathToFile.startsWith('http');
+        (document.URL.startsWith("http") &&
+          !document.URL.startsWith("http://localhost:1212/")) ||
+        pathToFile.startsWith("http");
 
-      window.locale = getParameterByName('locale');
+      window.locale = getParameterByName("locale");
     </script>
   </head>
   <body>

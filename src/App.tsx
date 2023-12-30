@@ -2,7 +2,7 @@ import React, { useReducer, useState, useEffect, useRef } from "react";
 // @ts-ignore
 import EasySpeech from "easy-speech";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import {
   AppBar,
   IconButton,

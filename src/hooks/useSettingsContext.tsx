@@ -16,8 +16,8 @@
  *
  */
 
-import { useContext } from 'react';
+import { useContext } from "react";
 
-import { SettingsContext } from './SettingsContextProvider';
+import { SettingsContext } from "./SettingsContextProvider";
 
 export const useSettingsContext = () => useContext(SettingsContext);

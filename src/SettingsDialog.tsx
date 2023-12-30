@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
@@ -57,7 +57,7 @@ interface Props {
 
 function SettingsDialog(props: Props) {
   const { open, onClose } = props;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const {
     speechSettings,
     handleDifficultyChange,
@@ -130,9 +130,12 @@ function SettingsDialog(props: Props) {
             <span style={{ width: "100%" }}>{t(Difficulty.advanced)}</span>
           </MenuItem>
         </Select>
-        <Typography gutterBottom>{t("seriesCount")}</Typography>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 20 }}>
+          <InputLabel shrink htmlFor="seriesCountID">
+            {t("seriesCount")}
+          </InputLabel>
           <Slider
+            id="seriesCountID"
             defaultValue={speechSettings.seriesCount}
             onChange={seriesCountChange}
             step={1}
@@ -156,19 +159,26 @@ function SettingsDialog(props: Props) {
             </MenuItem>
           ))}
         </Select>
-        <Typography gutterBottom>{t("speechSpeed")}</Typography>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 20 }}>
+          <InputLabel shrink htmlFor="timeoutID">
+            {t("timeout")}
+          </InputLabel>
           <Slider
+            id="timeoutID"
             defaultValue={speechSettings.speechSpeed}
             onChange={speedChange}
             step={0.05}
-            min={0.00}
+            min={0.0}
             max={10}
             valueLabelDisplay="on"
           />
         </div>
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 20 }}>
+          <InputLabel shrink htmlFor="speechSpeedID">
+            {t("speechSpeed")}
+          </InputLabel>
           <Slider
+            id="speechSpeedID"
             defaultValue={speechSettings.speechRate}
             onChange={rateChange}
             step={0.25}
@@ -177,12 +187,12 @@ function SettingsDialog(props: Props) {
             valueLabelDisplay="on"
           />
         </div>
-        <InputLabel shrink htmlFor="languages">
+        <InputLabel shrink htmlFor="languagesID">
           {t("languages")}
         </InputLabel>
         <Select
           onChange={languageChange}
-          input={<OutlinedInput id="languages" label={t("languages")} />}
+          input={<OutlinedInput id="languagesID" label={t("languages")} />}
           displayEmpty
           fullWidth
           value={speechSettings.speechLanguage}
@@ -197,25 +207,27 @@ function SettingsDialog(props: Props) {
           ))}
         </Select>
 
-        <InputLabel shrink htmlFor="voices">
-          {t("voices")}
-        </InputLabel>
-        <Select
-          onChange={voiceChange}
-          input={<OutlinedInput id="voices" label={t("voices")} />}
-          displayEmpty
-          fullWidth
-          value={speechSettings.speechVoice}
-        >
-          <MenuItem value={""} style={{ display: "none" }} />
-          {voices?.map((voice) => (
-            <MenuItem key={voice.name} value={voice.name}>
-              <span style={{ width: "100%" }}>
-                {voice.name} {voice.lang}
-              </span>
-            </MenuItem>
-          ))}
-        </Select>
+        <div style={{ marginTop: 20 }}>
+          <InputLabel shrink htmlFor="voicesID">
+            {t("voices")}
+          </InputLabel>
+          <Select
+            onChange={voiceChange}
+            input={<OutlinedInput id="voicesID" label={t("voices")} />}
+            displayEmpty
+            fullWidth
+            value={speechSettings.speechVoice}
+          >
+            <MenuItem value={""} style={{ display: "none" }} />
+            {voices?.map((voice) => (
+              <MenuItem key={voice.name} value={voice.name}>
+                <span style={{ width: "100%" }}>
+                  {voice.name} {voice.lang}
+                </span>
+              </MenuItem>
+            ))}
+          </Select>
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

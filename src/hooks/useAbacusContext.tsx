@@ -16,8 +16,8 @@
  *
  */
 
-import { useContext } from 'react';
+import { useContext } from "react";
 
-import { AbacusContext } from './AbacusContextProvider';
+import { AbacusContext } from "./AbacusContextProvider";
 
 export const useAbacusContext = () => useContext(AbacusContext);
