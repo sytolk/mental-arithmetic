@@ -169,7 +169,8 @@ const App: React.FC = () => {
                 getSequence(
                   speechSettings.seriesCount,
                   speechSettings.maxNum,
-                  speechSettings.difficulty
+                  speechSettings.difficulty,
+                  speechSettings.speechEnabled
                 )
               );
             }}
@@ -216,7 +217,7 @@ const App: React.FC = () => {
                 >
                   {currentNumber > 0 ? "+" + currentNumber : currentNumber}
                 </div>
-                <div style={{ fontSize: 56 }}>{currentTxt}</div>
+                {currentTxt && <div style={{ fontSize: 56 }}>{currentTxt}</div>}
               </>
             )}
             {showResult && !isPlaying && (

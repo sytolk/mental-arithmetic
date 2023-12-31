@@ -16,7 +16,7 @@
  *
  */
 
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
@@ -28,11 +28,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import Slider from "@mui/material/Slider";
-import Typography from "@mui/material/Typography";
 import DialogCloseButton from "./DialogCloseButton";
 import { Difficulty, TensLevel } from "./arithmeticTypes";
 import { useSettingsContext } from "./hooks/useSettingsContext";
 import { useSpeechContext } from "./hooks/useSpeechContext";
+import { FormControlLabel, Switch } from "@mui/material";
 
 interface Props {
   open: boolean;
@@ -67,6 +67,8 @@ function SettingsDialog(props: Props) {
     handleRateChange,
     handleVoiceChange,
     handleLanguageChange,
+    setSpeechEnabled,
+    setWrittenNumberEnabled,
   } = useSettingsContext();
   const { languages, voices } = useSpeechContext();
   const difficultyChange = (event: SelectChangeEvent) => {
@@ -79,6 +81,23 @@ function SettingsDialog(props: Props) {
 
   const seriesCountChange = (event: Event, newValue: number | number[]) => {
     handleSeriesCountChange(newValue as number);
+  };
+
+  const handleSpeedEnabled = (
+    event: ChangeEvent<HTMLInputElement>,
+    newValue: boolean
+  ) => {
+    setSpeechEnabled(newValue);
+    if(!newValue){
+      setWrittenNumberEnabled(newValue);
+    }
+  };
+
+  const handleWrittenNumber = (
+    event: ChangeEvent<HTMLInputElement>,
+    newValue: boolean
+  ) => {
+    setWrittenNumberEnabled(newValue);
   };
 
   const speedChange = (event: Event, newValue: number | number[]) => {
@@ -161,7 +180,7 @@ function SettingsDialog(props: Props) {
         </Select>
         <div style={{ marginTop: 20 }}>
           <InputLabel shrink htmlFor="timeoutID">
-            {t("timeout")}
+            {t("timeout") + " (s)"}
           </InputLabel>
           <Slider
             id="timeoutID"
@@ -174,11 +193,35 @@ function SettingsDialog(props: Props) {
           />
         </div>
         <div style={{ marginTop: 20 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={speechSettings.speechEnabled}
+                onChange={handleSpeedEnabled}
+              />
+            }
+            label={t("speechEnabled")}
+          />
+        </div>
+        <div style={{ marginTop: 20 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                disabled={!speechSettings.speechEnabled}
+                checked={speechSettings.writtenNumber}
+                onChange={handleWrittenNumber}
+              />
+            }
+            label={t("writtenNumber")}
+          />
+        </div>
+        <div style={{ marginTop: 20 }}>
           <InputLabel shrink htmlFor="speechSpeedID">
             {t("speechSpeed")}
           </InputLabel>
           <Slider
             id="speechSpeedID"
+            disabled={!speechSettings.speechEnabled}
             defaultValue={speechSettings.speechRate}
             onChange={rateChange}
             step={0.25}

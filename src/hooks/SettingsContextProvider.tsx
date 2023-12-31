@@ -20,11 +20,12 @@ import React, { createContext, useMemo, useReducer } from "react";
 import { getSettings, saveSettings } from "../settings";
 import { useTranslation } from "react-i18next";
 import { Difficulty, TensLevel } from "../arithmeticTypes";
-import i18n from "../i18n";
 
 type SettingsContextData = {
   speechSettings: SettingsType;
   setAutoResults: (auto: boolean) => void;
+  setSpeechEnabled: (enabled: boolean) => void;
+  setWrittenNumberEnabled: (enabled: boolean) => void;
   handleSpeedChange: (speechSpeed: number) => void;
   handleRateChange: (speechRate: number) => void;
   handleVoiceChange: (voiceChosen: string) => void;
@@ -38,6 +39,8 @@ export const SettingsContext = createContext<SettingsContextData>({
   // @ts-ignore
   speechSettings: {},
   setAutoResults: () => {},
+  setSpeechEnabled: () => {},
+  setWrittenNumberEnabled: () => {},
   handleSpeedChange: () => {},
   handleRateChange: () => {},
   handleVoiceChange: () => {},
@@ -53,6 +56,8 @@ export type SettingsContextProviderProps = {
 
 export type SettingsType = {
   autoResults: boolean;
+  speechEnabled: boolean;
+  writtenNumber: boolean;
   speechSpeed: number;
   speechRate: number;
   speechLanguage: string;
@@ -67,6 +72,8 @@ export const SettingsContextProvider = ({
 }: SettingsContextProviderProps) => {
   const { i18n } = useTranslation();
   const autoResults = React.useRef<boolean>(getDefaultAutoResults());
+  const speechEnabled = React.useRef<boolean>(getDefaultSpeechEnabled());
+  const writtenNumber = React.useRef<boolean>(getDefaultWrittenNumber());
   const speed = React.useRef<number>(getDefaultSpeed());
   const rate = React.useRef<number>(getDefaultRate());
   const language = React.useRef<string>(
@@ -83,6 +90,8 @@ export const SettingsContextProvider = ({
 
   let speechSettings: SettingsType = {
     autoResults: autoResults.current,
+    speechEnabled: speechEnabled.current,
+    writtenNumber: writtenNumber.current,
     speechSpeed: speed.current,
     speechRate: rate.current,
     speechLanguage: language.current,
@@ -95,6 +104,18 @@ export const SettingsContextProvider = ({
   function setAutoResults(results: boolean) {
     autoResults.current = results;
     speechSettings = saveSettings({ ...speechSettings, autoResults: results });
+    forceUpdate();
+  }
+
+  function setSpeechEnabled(results: boolean) {
+    speechEnabled.current = results;
+    speechSettings = saveSettings({ ...speechSettings, speechEnabled: results });
+    forceUpdate();
+  }
+
+  function setWrittenNumberEnabled(results: boolean) {
+    writtenNumber.current = results;
+    speechSettings = saveSettings({ ...speechSettings, writtenNumber: results });
     forceUpdate();
   }
 
@@ -172,6 +193,22 @@ export const SettingsContextProvider = ({
     return true;
   }
 
+  function getDefaultSpeechEnabled(): boolean {
+    const settingsSpeechEnabled = getSettings("speechEnabled");
+    if (settingsSpeechEnabled) {
+      return Boolean(settingsSpeechEnabled);
+    }
+    return true;
+  }
+
+  function getDefaultWrittenNumber(): boolean {
+    const settingsWrittenNumber = getSettings("writtenNumber");
+    if (settingsWrittenNumber) {
+      return Boolean(settingsWrittenNumber);
+    }
+    return true;
+  }
+
   function getDefaultSpeed(): number {
     const settingsSpeed = getSettings("speechSpeed");
     if (settingsSpeed) {
@@ -208,6 +245,8 @@ export const SettingsContextProvider = ({
     return {
       speechSettings: speechSettings,
       setAutoResults: setAutoResults,
+      setSpeechEnabled: setSpeechEnabled,
+      setWrittenNumberEnabled: setWrittenNumberEnabled,
       handleSpeedChange: handleSpeedChange,
       handleRateChange: handleRateChange,
       handleVoiceChange: handleVoiceChange,

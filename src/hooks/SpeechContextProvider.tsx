@@ -39,7 +39,7 @@ type SpeechContextData = {
   currentNumber: number | null;
   valueCalculated: number | null;
   sequence: Array<number>;
-  currentTxt: string;
+  currentTxt: string | null;
   showResult: boolean;
 };
 
@@ -52,7 +52,7 @@ export const SpeechContext = createContext<SpeechContextData>({
   currentNumber: null,
   valueCalculated: null,
   sequence: [],
-  currentTxt: "",
+  currentTxt: null,
   showResult: false,
 });
 
@@ -79,7 +79,7 @@ export const SpeechContextProvider = ({
   const valueCalculated = useRef<number | null>(null);
   const showResult = useRef<boolean>(false);
   const currentNumber = useRef<number | null>(null);
-  const currentTxt = useRef<string>("");
+  const currentTxt = useRef<string | null>(null);
 
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
 
@@ -169,40 +169,53 @@ export const SpeechContextProvider = ({
     return new Promise((resolve) => setTimeout(resolve, ms * 1000));
   };
 
+
+  const minusSign = isWin ? t("minus") + " " : "−";
+
   const read = useMemo(() => {
     return async (seq: Array<number>) => {
       for (let i = 0; i < seq.length; i++) {
-        if (speechSettings.speechSpeed > 0) {
-          await sleep(speechSettings.speechSpeed);
-        }
-        const positive = seq[i] > 0 ? seq[i] : seq[i] * -1;
-        const seqTxt = isWin
-          ? writtenNumber(positive, {
-              lang: i18n.language.split("-")[0], //speechSettings.speechLanguage.split("-")[0],
-            })
-          : positive;
-        const minusSign = isWin ? t("minus") + " " : "−";
-        const txt = seq[i] > 0 ? "+" + seqTxt : minusSign + seqTxt; //.replaceAll("-", "−");
-        //const txt = seq[i] > 0 ? "+" + seqTxt : "-" + seqTxt; //.replaceAll("-", "−");
-        currentTxt.current = txt;
-        currentNumber.current = seq[i];
-        forceUpdate();
-        try {
-          await speak(
-            txt,
-            speechSettings.speechRate,
-            speechSettings.speechVoice
-          );
-        } catch (err) {
-          console.log(err);
-        }
+        if (speechSettings.writtenNumber) {
+          const positive = seq[i] > 0 ? seq[i] : seq[i] * -1;
+          const seqTxt = isWin
+            ? writtenNumber(positive, {
+                lang: i18n.language.split("-")[0], //speechSettings.speechLanguage.split("-")[0],
+              })
+            : positive;
 
+          currentTxt.current = seq[i] > 0 ? "+ " + seqTxt : minusSign + seqTxt; //.replaceAll("-", "−");
+        } else {
+          currentTxt.current = null;
+        }
+        //const txt = seq[i] > 0 ? "+" + seqTxt : "-" + seqTxt; //.replaceAll("-", "−");
+
+        currentNumber.current = seq[i];
         valueCalculated.current = valueCalculated.current
           ? valueCalculated.current + seq[i]
           : seq[i]; // parseInt(texts[i], 10);
 
-        syncResults(valueCalculated.current);
+        if (speechSettings.speechSpeed > 0) {
+          await sleep(speechSettings.speechSpeed);
+        }
         forceUpdate();
+        syncResults(valueCalculated.current);
+
+        if (speechSettings.speechEnabled) {
+          try {
+            await speak(
+              speechSettings.writtenNumber
+                ? currentTxt.current
+                : seq[i] > 0
+                ? "+ " + seq[i]
+                : minusSign + Math.abs(seq[i]),
+              speechSettings.speechRate,
+              speechSettings.speechVoice
+            );
+          } catch (err) {
+            console.log(err);
+          }
+        }
+        //forceUpdate();
       }
     };
   }, [syncResults, speechSettings]);

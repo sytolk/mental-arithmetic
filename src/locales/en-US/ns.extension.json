@@ -16,6 +16,8 @@
   "timeout": "Timeout",
   "languages": "Languages",
   "autoResult": "Set Result in Abacus",
+  "speechEnabled": "Speech Enabled",
+  "writtenNumber": "Speak written number",
   "ten": "ten",
   "hundred": "hundred",
   "thousands": "thousands",

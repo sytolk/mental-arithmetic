@@ -24,14 +24,17 @@ export function sendMessageToHost(message: any) {
  * @param n
  * @param maxNum
  * @param difficulty Brothers; Easy = 1-> +4; 2=>+3+4 3=> +2+3+4; 4=> +1;+2+3+4; 5=>-1;-2;-3;-4; 6=>-2;-3;-4  (7-> -3;-4) 8=> -4;
+ * @param duplicates
  */
 export function getSequence(
   n: number,
   maxNum: number = 9,
-  difficulty = "Easy"
+  difficulty = "Easy",
+  duplicates = true
 ): number[] {
   let sequence = [];
   let sum = 0;
+  let lastSec = undefined;
   for (let i = 0; i < n; i++) {
     let num; //sequence.push(num);
     if (sum === 0) {
@@ -49,8 +52,13 @@ export function getSequence(
     if (difficulty === "Easy") {
       num = easyProcessNumber(sum, num);
     }
-    sequence.push(num);
-    sum += num;
+    if(duplicates || lastSec !== num) {
+      lastSec = num;
+      sequence.push(num);
+      sum += num;
+    } else {
+      i--
+    }
   }
   return sequence; // validateNumbers(sequence, maxNum);
 }
