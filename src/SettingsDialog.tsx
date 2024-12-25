@@ -16,13 +16,13 @@
  *
  */
 
-import React, { ChangeEvent } from "react";
+import React, { type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -88,7 +88,7 @@ function SettingsDialog(props: Props) {
     newValue: boolean
   ) => {
     setSpeechEnabled(newValue);
-    if(!newValue){
+    if (!newValue) {
       setWrittenNumberEnabled(newValue);
     }
   };

@@ -169,7 +169,6 @@ export const SpeechContextProvider = ({
     return new Promise((resolve) => setTimeout(resolve, ms * 1000));
   };
 
-
   const minusSign = isWin ? t("minus") + " " : "−";
 
   const read = useMemo(() => {

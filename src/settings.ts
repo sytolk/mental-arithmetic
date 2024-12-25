@@ -1,5 +1,5 @@
-import { HistoryResults } from "./math.types";
-import { SettingsType } from "./hooks/SettingsContextProvider";
+import { type HistoryResults } from "./math.types";
+import { type SettingsType } from "./hooks/SettingsContextProvider";
 
 export function saveSettings(settings: SettingsType) {
   localStorage.setItem("mathSettings", JSON.stringify(settings));
