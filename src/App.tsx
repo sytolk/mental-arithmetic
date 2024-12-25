@@ -26,7 +26,7 @@ import useEventListener from "./useEventListener";
 import { getParameterByName, getSequence, sendMessageToHost } from "./utils";
 import SettingsDialog from "./SettingsDialog";
 import { getHistoryResults } from "./settings";
-import { HistoryResults } from "./math.types";
+import { type HistoryResults } from "./math.types";
 import AutoResults from "./AutoResults";
 import { useAbacusContext } from "./hooks/useAbacusContext";
 import { useSpeechContext } from "./hooks/useSpeechContext";

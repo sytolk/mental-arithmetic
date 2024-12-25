@@ -52,12 +52,12 @@ export function getSequence(
     if (difficulty === "Easy") {
       num = easyProcessNumber(sum, num);
     }
-    if(duplicates || lastSec !== num) {
+    if (duplicates || lastSec !== num) {
       lastSec = num;
       sequence.push(num);
       sum += num;
     } else {
-      i--
+      i--;
     }
   }
   return sequence; // validateNumbers(sequence, maxNum);

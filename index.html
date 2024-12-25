@@ -3,32 +3,31 @@
   <head>
     <title>Arithmetic Player for TagSpaces</title>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./src/index.tsx" type="module"></script>
     <script>
-      function setContent(content, fileDirectory, editMode) {
+      function setContent(content, fileDirectory, editMode, theme) {
         console.log("Content updated, event triggered");
-        window.resultsContent = content;
+        window.fileContent = content;
         window.editMode = !editMode;
         window.fileDirectory = fileDirectory;
         window.dispatchEvent(new Event("contentLoaded"));
+        setTheme(theme);
       }
 
       function getContent() {
-        return window.resultsContent;
+        return window.fileContent;
       }
 
       function setTheme(theme) {
-        document.documentElement.className = theme;
-        document.documentElement.setAttribute("data-theme", theme);
-        window.theme = theme;
-        window.dispatchEvent(new Event("themeChanged"));
-      }
-
-      function ttsEnd() {
-        window.dispatchEvent(new Event("ttsEnd"));
+        if (theme) {
+          console.log("setTheme: " + theme + " event triggered");
+          window.theme = theme;
+          window.dispatchEvent(new Event("themeChanged"));
+        }
       }
 
       function getParameterByName(paramName) {
-        // todo move to utils
         const name = paramName.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         const regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
         const results = regex.exec(location.search);
@@ -49,12 +48,22 @@
       textColor && rootEl.style.setProperty("--primary-text-color", textColor);
 
       const pathToFile = getParameterByName("file");
+      window.filePath = pathToFile;
       window.isWeb =
         (document.URL.startsWith("http") &&
           !document.URL.startsWith("http://localhost:1212/")) ||
         pathToFile.startsWith("http");
 
       window.locale = getParameterByName("locale");
+      window.eventID = getParameterByName("eventID");
+      window.theme = getParameterByName("theme");
+      window.query = getParameterByName("query");
+      window.editMode = getParameterByName("editMode");
+
+      /*const theme = getParameterByName('theme'); // TODO migrate theme GET param in setContent(..theme)
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }*/
     </script>
   </head>
   <body>

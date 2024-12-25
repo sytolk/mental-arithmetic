@@ -109,13 +109,19 @@ export const SettingsContextProvider = ({
 
   function setSpeechEnabled(results: boolean) {
     speechEnabled.current = results;
-    speechSettings = saveSettings({ ...speechSettings, speechEnabled: results });
+    speechSettings = saveSettings({
+      ...speechSettings,
+      speechEnabled: results,
+    });
     forceUpdate();
   }
 
   function setWrittenNumberEnabled(results: boolean) {
     writtenNumber.current = results;
-    speechSettings = saveSettings({ ...speechSettings, writtenNumber: results });
+    speechSettings = saveSettings({
+      ...speechSettings,
+      writtenNumber: results,
+    });
     forceUpdate();
   }
 

@@ -1,43 +1,52 @@
-import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import HttpApi from "i18next-http-backend";
-import LanguageDetector from "i18next-browser-languagedetector";
-import enUs from "./locales/en-US/ns.extension.json";
+import i18n from "i18next";
 
-let defaultLanguage = enUs;
+import en from "./locales/en-US/ns.extension.json";
+import bg from "./locales/bg-BG/ns.extension.json";
+import de_DE from "./locales/de-DE/ns.extension.json";
+import fr from "./locales/fr-FR/ns.extension.json";
 
-function loadLocales(options: any, url: string, payload: any, callback: any) {
-  import("./locales/" + url + "/ns.extension.json")
-    .then((locale) => {
-      callback(undefined, { status: "200", data: locale });
-      return true;
-    })
-    .catch(() => {
-      console.log("Error loading " + url + " locale.");
-      callback(undefined, { status: "200", data: defaultLanguage });
-    });
-}
-
-const options = {
-  fallbackLng: "enUs",
-  // load: 'all', // ['en', 'de'], // we only provide en, de -> no region specific locals like en-US, de-DE
-  // ns: ['core'],
-  // defaultNS: 'core',
-  attributes: ["t", "i18n"],
-  backend: {
-    loadPath: "{{lng}}",
-    parse: (data: any) => data, // comment to have working i18n switch
-    request: loadLocales, // comment to have working i18n switch
-  },
+export const resources = {
+  en: { translation: en },
+  bg: { translation: bg },
+  de: { translation: de_DE },
+  fr: { translation: fr },
 };
 
-i18n.use(HttpApi).use(LanguageDetector);
-if (!i18n.isInitialized) {
-  i18n.use(initReactI18next).init(options, (err, t) => {
-    if (err) {
-      return console.log("something went wrong loading", err);
-    }
+export const supportedLngs = ["en", "bg", "de", "fr"];
+
+export const defaultNS = "translation";
+
+//@ts-ignore
+const lng = window.locale;
+
+i18n
+  // load translation using http -> see /assets/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/assets/locales)
+  // learn more: https://github.com/i18next/i18next-http-backend
+  // want your translations to be loaded from a professional CDN? => https://github.com/locize/react-tutorial#step-2---use-the-locize-cdn
+  //.use(Backend)
+  // detect user language
+  // learn more: https://github.com/i18next/i18next-browser-languageDetector
+  //.use(LanguageDetector)
+  // pass the i18n instance to react-i18next.
+  .use(initReactI18next)
+  // init i18next
+  // for all options read: https://www.i18next.com/overview/configuration-options
+  .init({
+    returnNull: false,
+    fallbackLng: "en",
+    debug: true,
+    supportedLngs,
+    ns: ["translation"],
+    defaultNS,
+    // load: 'languageOnly',
+    nonExplicitSupportedLngs: true,
+    interpolation: {
+      escapeValue: false, // not needed for react as it escapes by default
+    },
+    resources,
+    ...(lng && { lng: lng }),
+    //request: loadLocales,
   });
-}
 
 export default i18n;

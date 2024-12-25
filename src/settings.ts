@@ -1,17 +1,27 @@
-import { HistoryResults } from "./math.types";
-import { SettingsType } from "./hooks/SettingsContextProvider";
+import { type HistoryResults } from "./math.types";
+import { type SettingsType } from "./hooks/SettingsContextProvider";
 
 export function saveSettings(settings: SettingsType) {
-  localStorage.setItem("mathSettings", JSON.stringify(settings));
+  try {
+    localStorage.setItem("mathSettings", JSON.stringify(settings));
+  } catch (e) {
+    console.log("saveSettings error", e);
+  }
+
   return settings;
 }
 
 export function getSettings(key: string) {
-  const item = localStorage.getItem("mathSettings");
-  if (item) {
-    const settings = JSON.parse(item);
-    return settings[key];
+  try {
+    const item = localStorage.getItem("mathSettings");
+    if (item) {
+      const settings = JSON.parse(item);
+      return settings[key];
+    }
+  } catch (e) {
+    console.log("getSettings error", e);
   }
+
   return undefined;
 }
 
