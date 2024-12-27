@@ -36,8 +36,18 @@ type SettingsContextData = {
 };
 
 export const SettingsContext = createContext<SettingsContextData>({
-  // @ts-ignore
-  speechSettings: {},
+  speechSettings: {
+    autoResults: true,
+    speechEnabled: true,
+    writtenNumber: true,
+    speechSpeed: 0.05,
+    speechRate: 0.9,
+    speechLanguage: "en",
+    speechVoice: "",
+    seriesCount: 5,
+    maxNum: TensLevel.ten,
+    difficulty: Difficulty.easy,
+  },
   setAutoResults: () => {},
   setSpeechEnabled: () => {},
   setWrittenNumberEnabled: () => {},
@@ -86,7 +96,11 @@ export const SettingsContextProvider = ({
     getSettings("difficulty") || Difficulty.easy
   );
 
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [ignored, forceUpdate] = useReducer(
+    (x) => x + 1,
+    0,
+    () => {}
+  );
 
   let speechSettings: SettingsType = {
     autoResults: autoResults.current,
