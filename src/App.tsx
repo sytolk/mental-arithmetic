@@ -62,6 +62,9 @@ const App: React.FC = () => {
   // @ts-ignore
   const readOnly = () => !window.editMode;
 
+  useEffect(() => {
+    sendMessageToHost({ command: "parentLoadTextContent" });
+  },[]);
   /*function parse(str: string) {
     let res = 0;
     const texts = getContent().split(" ");
@@ -71,6 +74,12 @@ const App: React.FC = () => {
     return res;
     // return Function(`'use strict'; return (${str})`)();
   }*/
+
+  // @ts-ignore
+  useEventListener("fileContent", (event) => {
+    // @ts-ignore
+    window.fileContent = event.content;
+  });
 
   // @ts-ignore
   /*useEventListener("keydown", (event) => {
@@ -120,8 +129,9 @@ const App: React.FC = () => {
       currentResult.current = null;
       forceUpdate();
       historyResult.current = [...historyResult.current, newResults];
+      const fileContent = JSON.stringify(historyResult.current);
       // @ts-ignore
-      window.resultsContent = JSON.stringify(historyResult.current);
+      window.resultsContent = fileContent;
 
       const filePath = getParameterByName("file");
       /*sendMessageToHost({
@@ -130,7 +140,8 @@ const App: React.FC = () => {
       });*/
 
       sendMessageToHost({
-        command: "saveDocument",
+        command: "parentSaveDocument",
+        content: fileContent,
         // @ts-ignore
         filepath: filePath, //window.fileDirectory
         force: true,
